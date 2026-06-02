@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group = 'br.com.fretegestao'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://jaspersoft.jfrog.io/artifactory/third-party-ce-artifacts/'
+    }
+}
+
+dependencies {
+
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+    compileOnly 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
+    compileOnly 'javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.2'
+
+    implementation 'org.glassfish.web:javax.servlet.jsp.jstl:1.2.5'
+
+    implementation 'org.postgresql:postgresql:42.6.0'
+
+    implementation 'org.apache.commons:commons-dbcp2:2.9.0'
+    implementation 'org.apache.commons:commons-pool2:2.11.1'
+
+    implementation 'net.sf.jasperreports:jasperreports:6.20.6'
+
+    implementation 'com.lowagie:itext:2.1.7'
+    implementation 'org.apache.poi:poi:5.2.3'
+
+    implementation 'commons-logging:commons-logging:1.2'
+}
+
+war {
+    archiveFileName = 'frete-gestao.war'
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
