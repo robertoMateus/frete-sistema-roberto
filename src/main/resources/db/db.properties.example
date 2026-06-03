@@ -1,0 +1,10 @@
+db.url=jdbc:postgresql://localhost:5432/frete_gestao
+db.username=postgres
+db.password=SUA_SENHA_AQUI
+db.driver=org.postgresql.Driver
+
+db.pool.initialSize=5
+db.pool.maxTotal=20
+db.pool.maxIdle=10
+db.pool.minIdle=5
+db.pool.maxWaitMillis=10000
