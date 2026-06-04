@@ -18,3 +18,7 @@ FOREIGN KEY (id_veiculo) REFERENCES veiculo(id);
 ALTER TABLE ocorrencia_frete
 ADD CONSTRAINT fk_ocorrencia_frete
 FOREIGN KEY (id_frete) REFERENCES frete(id);
+
+ALTER TABLE manutencao_veiculo
+ADD CONSTRAINT fk_manutencao_veiculo
+FOREIGN KEY (id_veiculo) REFERENCES veiculo(id);

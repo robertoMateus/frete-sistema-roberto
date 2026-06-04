@@ -52,6 +52,9 @@ CREATE TABLE veiculo (
     status VARCHAR(20) NOT NULL
 );
 
+-- Sequence para geração do número do frete
+CREATE SEQUENCE seq_frete_numero START 1;
+
 -- tabela de frete
 CREATE TABLE frete (
     id BIGSERIAL PRIMARY KEY,
@@ -91,4 +94,33 @@ CREATE TABLE ocorrencia_frete (
     documento_recebedor VARCHAR(20)
 );
 
+--tabela de usuario pra autenticação
+CREATE TABLE usuario (
+    id BIGSERIAL PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE
+);
 
+CREATE TABLE manutencao_veiculo (
+    id BIGSERIAL PRIMARY KEY,
+    id_veiculo BIGINT NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
+    descricao TEXT,
+    data_inicio DATE NOT NULL,
+    data_fim DATE,
+    custo NUMERIC(10,2)
+);
+
+
+-- tabela de preço de rota
+CREATE TABLE preco_rota (
+    id BIGSERIAL PRIMARY KEY,
+    municipio_origem VARCHAR(100) NOT NULL,
+    uf_origem VARCHAR(2) NOT NULL,
+    municipio_destino VARCHAR(100) NOT NULL,
+    uf_destino VARCHAR(2) NOT NULL,
+    valor_base NUMERIC(10,2) NOT NULL,
+    valor_por_kg NUMERIC(10,2)
+);
