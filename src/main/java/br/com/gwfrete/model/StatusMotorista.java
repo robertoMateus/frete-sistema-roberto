@@ -1,9 +1,20 @@
 package br.com.gwfrete.model;
 
 public enum StatusMotorista {
-    ATIVO,
-    INATIVO,
-    SUSPENSO;
+
+    ATIVO("Ativo"),
+    INATIVO("Inativo"),
+    SUSPENSO("Suspenso");
+
+    private final String descricao;
+
+    StatusMotorista(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
 
     public static StatusMotorista fromString(String status) {
         for (StatusMotorista s : StatusMotorista.values()) {
@@ -11,6 +22,6 @@ public enum StatusMotorista {
                 return s;
             }
         }
-        throw new IllegalArgumentException("Status inválido: " + status);
+        throw new IllegalArgumentException("Status de motorista inválido: " + status);
     }
 }

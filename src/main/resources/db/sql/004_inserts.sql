@@ -16,7 +16,7 @@ INSERT INTO cliente (razao_social, nome_fantasia, cnpj, inscricao_estadual, logr
 
 
 -- insert de motoristas
-INSERT INTO motorista (nome, cpf, data_nascimento, telefone, cnh_numero, cnh_categoria, data_validade_cnh, tipo_vinculo, status) VALUES
+INSERT INTO motorista (nome, cpf, data_nascimento, telefone, cnh_numero, cnh_categoria, cnh_validade, tipo_vinculo, status) VALUES
 ('Carlos Eduardo Silva', '52998224725', '1985-03-15', '(81) 99111-1111', '12345678901', 'E', '2027-03-15', 'FUNCIONARIO', 'ATIVO'),
 ('José Antônio Santos', '11144477735', '1978-07-22', '(81) 98222-2222', '23456789012', 'D', '2026-07-22', 'FUNCIONARIO', 'ATIVO'),
 ('Pedro Henrique Oliveira', '66168741609', '1990-11-10', '(81) 97333-3333', '34567890123', 'E', '2027-11-10', 'AGREGADO', 'ATIVO'),
@@ -52,9 +52,10 @@ INSERT INTO frete (numero, id_remetente, id_destinatario, id_motorista, id_veicu
 ('FRT-2026-00007', 1, 5, 4, 6, 'Recife', 'PE', 'Salvador', 'BA', 'Equipamentos industriais', 15000.00, 40, 6500.00, 12.00, 780.00, 7280.00, 'EMITIDO', '2026-05-28 09:00:00', '2026-06-02 18:00:00', NULL, NULL),
 
 ('FRT-2026-00008', 2, 4, 4, 4,'São Paulo', 'SP','Fortaleza', 'CE','Medicamentos',3000.00,150,2800.00,12.00,336.00,3136.00,'EM_TRANSITO','2026-05-10 08:00:00','2026-05-15 18:00:00','2026-05-10 10:00:00',NULL);
+
 -- insert de ocorrências
 INSERT INTO ocorrencia_frete (id_frete, tipo, data_hora, municipio, uf, descricao, nome_recebedor, documento_recebedor) VALUES
-(1, 'SAIDA_PATIO', '2026-05-01 10:00:00', 'Recife', 'PE', NULL, NULL, NULL),
+(1, 'SAIDA_PATIO', '2026-05-01 10:00:00', 'Recife', 'PE', NULL, NULL, NULL), 
 (1, 'EM_ROTA', '2026-05-02 14:00:00', 'Maceió', 'AL', NULL, NULL, NULL),
 (1, 'EM_ROTA', '2026-05-03 10:00:00', 'Salvador', 'BA', NULL, NULL, NULL),
 (1, 'ENTREGA_REALIZADA', '2026-05-05 14:30:00', 'São Paulo', 'SP', NULL, 'João da Silva', '123.456.789-00'),
@@ -79,7 +80,7 @@ INSERT INTO manutencao_veiculo (id_veiculo, tipo, descricao, data_inicio, data_f
 (3, 'corretiva', 'Reparo no sistema de freios', '2026-03-20', '2026-03-22', 1800.00);
 
 -- insert de preços de rota
-INSERT INTO preco_rota (municipio_origem, uf_origem, municipio_destino, uf_destino, valor_base, valor_por_kg) VALUES
+INSERT INTO tabela_frete (municipio_origem, uf_origem, municipio_destino, uf_destino, valor_base, valor_por_kg) VALUES
 ('Recife', 'PE', 'São Paulo', 'SP', 2500.00, 0.50),
 ('Recife', 'PE', 'Rio de Janeiro', 'RJ', 2000.00, 0.45),
 ('Recife', 'PE', 'Salvador', 'BA', 800.00, 0.20),

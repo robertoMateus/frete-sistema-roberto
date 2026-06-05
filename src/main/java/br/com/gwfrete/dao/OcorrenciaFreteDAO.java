@@ -79,6 +79,23 @@ public class OcorrenciaFreteDAO {
         return null;
     }
 
+        public boolean jaPossuiEntregaRealizada(Long idFrete, Connection conn) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM ocorrencia_frete " +
+                "WHERE id_frete = ? AND tipo = 'ENTREGA_REALIZADA'";
+ 
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, idFrete);
+ 
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+
     private OcorrenciaFrete mapear(ResultSet rs) throws SQLException {
         OcorrenciaFrete ocorrencia = new OcorrenciaFrete();
         ocorrencia.setId(rs.getLong("id"));

@@ -170,7 +170,7 @@ public class VeiculoDAO {
         return 0;
     }
 
-    public boolean estaEmViagem(Long idVeiculo, Connection conn) throws SQLException {
+    public boolean possuiFreteEmTransito(Long idVeiculo, Connection conn) throws SQLException {
         String sql = "SELECT COUNT(*) FROM frete WHERE id_veiculo = ? " +
                 "AND status = 'EM_TRANSITO'";
 

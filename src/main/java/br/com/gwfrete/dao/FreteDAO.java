@@ -14,8 +14,7 @@ import java.util.List;
 
 public class FreteDAO {
 
-    private static final String COLUNAS =
-            "id, numero, id_remetente, id_destinatario, id_motorista, id_veiculo, " +
+    private static final String COLUNAS = "id, numero, id_remetente, id_destinatario, id_motorista, id_veiculo, " +
             "municipio_origem, uf_origem, municipio_destino, uf_destino, " +
             "descricao_carga, peso_kg, volumes, valor_frete, aliquota_icms, " +
             "valor_icms, valor_total, status, " +
@@ -80,7 +79,8 @@ public class FreteDAO {
         }
     }
 
-    public void atualizarDataEntrega(Long id, java.time.LocalDateTime dataEntrega, Connection conn) throws SQLException {
+    public void atualizarDataEntrega(Long id, java.time.LocalDateTime dataEntrega, Connection conn)
+            throws SQLException {
         String sql = "UPDATE frete SET data_entrega = ?, status = ? WHERE id = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -160,7 +160,7 @@ public class FreteDAO {
                 "ORDER BY data_previsao_entrega ASC";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 fretes.add(mapear(rs, conn));
             }
@@ -168,7 +168,8 @@ public class FreteDAO {
         return fretes;
     }
 
-    public List<Frete> listarPorMotoristaEData(Long idMotorista, java.time.LocalDate data, Connection conn) throws SQLException {
+    public List<Frete> listarPorMotoristaEData(Long idMotorista, java.time.LocalDate data, Connection conn)
+            throws SQLException {
         List<Frete> fretes = new ArrayList<>();
 
         String sql = "SELECT " + COLUNAS + " FROM frete " +
@@ -224,6 +225,29 @@ public class FreteDAO {
         return false;
     }
 
+    public long buscarProximoSequencial(Connection conn) throws SQLException {
+        String sql = "SELECT nextval('seq_frete_numero')";
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+            throw new SQLException(
+                    "Não foi possível obter o próximo valor da sequence seq_frete_numero.");
+        }
+    }
+
+    public boolean motoristaTemFreteAtivo(Long idMotorista, Connection conn) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM frete WHERE id_motorista = ? " +
+                "AND status IN ('SAIDA_CONFIRMADA', 'EM_TRANSITO')";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, idMotorista);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+
     private Frete mapear(ResultSet rs, Connection conn) throws SQLException {
         Frete frete = new Frete();
         frete.setId(rs.getLong("id"));
@@ -242,18 +266,23 @@ public class FreteDAO {
         frete.setStatus(StatusFrete.fromString(rs.getString("status")));
 
         Timestamp dataEmissao = rs.getTimestamp("data_emissao");
-        if (dataEmissao != null) frete.setDataEmissao(dataEmissao.toLocalDateTime());
+        if (dataEmissao != null)
+            frete.setDataEmissao(dataEmissao.toLocalDateTime());
 
         Timestamp dataPrevisao = rs.getTimestamp("data_previsao_entrega");
-        if (dataPrevisao != null) frete.setDataPrevisaoEntrega(dataPrevisao.toLocalDateTime());
+        if (dataPrevisao != null)
+            frete.setDataPrevisaoEntrega(dataPrevisao.toLocalDateTime());
 
         Timestamp dataSaida = rs.getTimestamp("data_saida");
-        if (dataSaida != null) frete.setDataSaida(dataSaida.toLocalDateTime());
+        if (dataSaida != null)
+            frete.setDataSaida(dataSaida.toLocalDateTime());
 
         Timestamp dataEntrega = rs.getTimestamp("data_entrega");
-        if (dataEntrega != null) frete.setDataEntrega(dataEntrega.toLocalDateTime());
+        if (dataEntrega != null)
+            frete.setDataEntrega(dataEntrega.toLocalDateTime());
 
-        // carrega objetos relacionados com apenas o id — o BO busca completo quando precisar
+        // carrega objetos relacionados com apenas o id — o BO busca completo quando
+        // precisar
         ClienteDAO clienteDAO = new ClienteDAO();
         frete.setRemetente(clienteDAO.buscarPorId(rs.getLong("id_remetente"), conn));
         frete.setDestinatario(clienteDAO.buscarPorId(rs.getLong("id_destinatario"), conn));

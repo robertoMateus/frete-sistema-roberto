@@ -30,7 +30,7 @@ CREATE TABLE motorista (
 
     cnh_numero VARCHAR(20) NOT NULL,
     cnh_categoria VARCHAR(2) NOT NULL,
-    data_validade_cnh DATE NOT NULL,
+    cnh_validade DATE NOT NULL,
 
     tipo_vinculo VARCHAR(20) NOT NULL,
     status VARCHAR(20) NOT NULL
@@ -115,7 +115,7 @@ CREATE TABLE manutencao_veiculo (
 
 
 -- tabela de preço de rota
-CREATE TABLE preco_rota (
+CREATE TABLE tabela_frete (
     id BIGSERIAL PRIMARY KEY,
     municipio_origem VARCHAR(100) NOT NULL,
     uf_origem VARCHAR(2) NOT NULL,

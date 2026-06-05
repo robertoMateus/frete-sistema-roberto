@@ -22,3 +22,8 @@ FOREIGN KEY (id_frete) REFERENCES frete(id);
 ALTER TABLE manutencao_veiculo
 ADD CONSTRAINT fk_manutencao_veiculo
 FOREIGN KEY (id_veiculo) REFERENCES veiculo(id);
+
+-- Unique Constraints
+ALTER TABLE tabela_frete
+ADD CONSTRAINT uk_tabela_frete
+UNIQUE (municipio_origem, uf_origem, municipio_destino, uf_destino);
