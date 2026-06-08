@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
-                             http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
-         version="4.0">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+    version="4.0">
 
     <display-name>Frete Gestão</display-name>
 
+    <!-- Filters -->
     <filter>
         <filter-name>EncodingFilter</filter-name>
         <filter-class>br.com.gwfrete.filter.EncodingFilter</filter-class>
@@ -31,9 +31,125 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>LoginController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.LoginController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginController</servlet-name>
+        <url-pattern>/auth/login</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>LogoutController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.LogoutController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutController</servlet-name>
+        <url-pattern>/auth/logout</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ClienteController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.ClienteController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ClienteController</servlet-name>
+        <url-pattern>/cliente/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MotoristaController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.MotoristaController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MotoristaController</servlet-name>
+        <url-pattern>/motoristas/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>VeiculoController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.VeiculoController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VeiculoController</servlet-name>
+        <url-pattern>/veiculos/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>FreteController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.FreteController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FreteController</servlet-name>
+        <url-pattern>/fretes/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>OcorrenciaFreteController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.OcorrenciaFreteController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OcorrenciaFreteController</servlet-name>
+        <url-pattern>/ocorrencias/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ManutencaoVeiculoController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.ManutencaoVeiculoController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ManutencaoVeiculoController</servlet-name>
+        <url-pattern>/manutencoes/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PrecoRotaController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.PrecoRotaController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PrecoRotaController</servlet-name>
+        <url-pattern>/precosRota/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>HomeController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.HomeController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>HomeController</servlet-name>
+        <url-pattern>/home</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ErroController</servlet-name>
+        <servlet-class>br.com.gwfrete.controller.ErroController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ErroController</servlet-name>
+        <url-pattern>/erro</url-pattern>
+    </servlet-mapping>
+
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
+
+    <!-- Páginas de erro -->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/views/erro.jsp</location>
+    </error-page>
+
+    <error-page>
+        <error-code>500</error-code>
+        <location>/WEB-INF/views/erro.jsp</location>
+    </error-page>
+
+    <error-page>
+        <exception-type>java.lang.Exception</exception-type>
+        <location>/WEB-INF/views/erro.jsp</location>
+    </error-page>
 
     <session-config>
         <session-timeout>30</session-timeout>

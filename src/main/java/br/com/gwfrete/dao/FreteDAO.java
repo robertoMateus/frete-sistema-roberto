@@ -248,6 +248,34 @@ public class FreteDAO {
         }
     }
 
+    public int contarPorStatus(StatusFrete status, Connection conn) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM frete WHERE status = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status.name());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    public int contarAtrasados(Connection conn) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM frete " +
+                "WHERE status IN ('EMITIDO', 'SAIDA_CONFIRMADA', 'EM_TRANSITO') " +
+                "AND data_previsao_entrega < NOW()";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
     private Frete mapear(ResultSet rs, Connection conn) throws SQLException {
         Frete frete = new Frete();
         frete.setId(rs.getLong("id"));

@@ -318,6 +318,24 @@ public class FreteBO {
         }
     }
 
+    public int contarPorStatus(StatusFrete status) throws FreteException {
+        try (Connection conn = ConexaoPool.getConexao()) {
+            return freteDAO.contarPorStatus(status, conn);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao contar fretes por status.", e);
+            throw new FreteException("Erro inesperado ao contar fretes por status.");
+        }
+    }
+
+    public int contarAtrasados() throws FreteException {
+        try (Connection conn = ConexaoPool.getConexao()) {
+            return freteDAO.contarAtrasados(conn);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao contar fretes atrasados.", e);
+            throw new FreteException("Erro inesperado ao contar fretes atrasados.");
+        }
+    }
+
     // Validações privadas
     private void validarCamposObrigatorios(Frete frete) throws CadastroException {
         if (frete.getRemetente() == null || frete.getRemetente().getId() == null) {

@@ -8,7 +8,7 @@ public class Cliente {
     private String cnpj;
     private String inscricaoEstadual;
 
-    //Dados para endereço
+    // Dados para endereço
     private String logradouro;
     private String numero;
     private String complemento;
@@ -17,7 +17,7 @@ public class Cliente {
     private String uf;
     private String cep;
 
-    //Dados para contato
+    // Dados para contato
     private String telefone;
     private String email;
     private StatusCliente status;
@@ -143,5 +143,15 @@ public class Cliente {
 
     public void setStatus(StatusCliente status) {
         this.status = status;
+    }
+
+    public String getCnpjFormatado() {
+        if (cnpj == null || cnpj.length() != 14)
+            return cnpj;
+        return cnpj.substring(0, 2) + "." +
+                cnpj.substring(2, 5) + "." +
+                cnpj.substring(5, 8) + "/" +
+                cnpj.substring(8, 12) + "-" +
+                cnpj.substring(12, 14);
     }
 }

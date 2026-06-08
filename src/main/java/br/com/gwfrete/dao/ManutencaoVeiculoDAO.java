@@ -16,7 +16,10 @@ import java.util.List;
 public class ManutencaoVeiculoDAO {
 
     private static final String COLUNAS =
-            "id, id_veiculo, tipo, descricao, data_inicio, data_fim, custo";
+            "m.id, m.id_veiculo, m.tipo, m.descricao, m.data_inicio, m.data_fim, m.custo, v.placa";
+
+    private static final String FROM_JOIN =
+            "FROM manutencao_veiculo m JOIN veiculo v ON v.id = m.id_veiculo ";
 
     public void inserir(ManutencaoVeiculo manutencao, Connection conn) throws SQLException {
         String sql = "INSERT INTO manutencao_veiculo " +
@@ -68,7 +71,7 @@ public class ManutencaoVeiculoDAO {
     }
 
     public ManutencaoVeiculo buscarPorId(Long id, Connection conn) throws SQLException {
-        String sql = "SELECT " + COLUNAS + " FROM manutencao_veiculo WHERE id = ?";
+        String sql = "SELECT " + COLUNAS + " " + FROM_JOIN + "WHERE m.id = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
@@ -84,9 +87,9 @@ public class ManutencaoVeiculoDAO {
     public List<ManutencaoVeiculo> listarPorVeiculo(Long idVeiculo, Connection conn) throws SQLException {
         List<ManutencaoVeiculo> manutencoes = new ArrayList<>();
 
-        String sql = "SELECT " + COLUNAS + " FROM manutencao_veiculo " +
-                "WHERE id_veiculo = ? " +
-                "ORDER BY data_inicio DESC";
+        String sql = "SELECT " + COLUNAS + " " + FROM_JOIN +
+                "WHERE m.id_veiculo = ? " +
+                "ORDER BY m.data_inicio DESC";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, idVeiculo);
@@ -102,15 +105,14 @@ public class ManutencaoVeiculoDAO {
     public List<ManutencaoVeiculo> listarEmAberto(Connection conn) throws SQLException {
         List<ManutencaoVeiculo> manutencoes = new ArrayList<>();
 
-        String sql = "SELECT " + COLUNAS + " FROM manutencao_veiculo " +
-                "WHERE data_fim IS NULL " +
-                "ORDER BY data_inicio ASC";
+        String sql = "SELECT " + COLUNAS + " " + FROM_JOIN +
+                "WHERE m.data_fim IS NULL " +
+                "ORDER BY m.data_inicio ASC";
 
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    manutencoes.add(mapear(rs));
-                }
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                manutencoes.add(mapear(rs));
             }
         }
         return manutencoes;
@@ -141,6 +143,7 @@ public class ManutencaoVeiculoDAO {
 
         Veiculo veiculo = new Veiculo();
         veiculo.setId(rs.getLong("id_veiculo"));
+        veiculo.setPlaca(rs.getString("placa"));
         manutencao.setVeiculo(veiculo);
 
         return manutencao;

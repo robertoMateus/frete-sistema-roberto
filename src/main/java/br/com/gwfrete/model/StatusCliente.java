@@ -1,8 +1,19 @@
 package br.com.gwfrete.model;
 
 public enum StatusCliente {
-    ATIVO,
-    INATIVO;
+
+    ATIVO("Ativo"),
+    INATIVO("Inativo");
+
+    private final String descricao;
+
+    StatusCliente(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
 
     public static StatusCliente fromString(String status) {
         for (StatusCliente s : StatusCliente.values()) {

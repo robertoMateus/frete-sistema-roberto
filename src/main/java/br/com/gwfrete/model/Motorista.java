@@ -8,8 +8,8 @@ public class Motorista {
     private String cpf;
     private LocalDate dataNascimento;
     private String telefone;
-    
-    //Dados para cnh
+
+    // Dados para cnh
     private String numeroCnh;
     private LocalDate dataValidadeCnh;
     private CategoriaCnh categoriaCnh;
@@ -100,6 +100,25 @@ public class Motorista {
         this.status = status;
     }
 
-    
+    public String getCpfFormatado() {
+        if (cpf == null || cpf.length() != 11)
+            return cpf;
+        return cpf.substring(0, 3) + "." +
+                cpf.substring(3, 6) + "." +
+                cpf.substring(6, 9) + "-" +
+                cpf.substring(9, 11);
+    }
+
+    public String getDataNascimentoFormatada() {
+        if (dataNascimento == null)
+            return "";
+        return dataNascimento.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
+    public String getDataValidadeCnhFormatada() {
+        if (dataValidadeCnh == null)
+            return "";
+        return dataValidadeCnh.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
 
 }

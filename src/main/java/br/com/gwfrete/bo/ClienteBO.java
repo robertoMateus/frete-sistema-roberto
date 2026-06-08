@@ -9,6 +9,7 @@ import br.com.gwfrete.util.CepUtil;
 import br.com.gwfrete.util.CnpjUtil;
 import br.com.gwfrete.util.ConexaoPool;
 import br.com.gwfrete.util.EmailUtil;
+import br.com.gwfrete.util.UfUtil;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -172,5 +173,12 @@ public class ClienteBO {
                 throw new CadastroException("O e-mail informado é inválido.");
             }
         }
+        if (cliente.getUf() != null && !cliente.getUf().trim().isEmpty()) {
+            if (!UfUtil.validarUf(cliente.getUf())) {
+                throw new CadastroException("A UF informada é inválida.");
+            }
+        }
+
+        cliente.setUf(UfUtil.normalizar(cliente.getUf()));
     }
 }

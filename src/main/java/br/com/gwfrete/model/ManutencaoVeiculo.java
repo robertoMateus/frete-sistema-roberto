@@ -11,7 +11,7 @@ public class ManutencaoVeiculo {
     private LocalDate dataInicio;
     private LocalDate dataFim;
     private BigDecimal custo;
-    
+
     public ManutencaoVeiculo() {
     }
 
@@ -71,5 +71,10 @@ public class ManutencaoVeiculo {
         this.custo = custo;
     }
 
-    
+    public String getDataInicioFormatada() {
+        if (dataInicio == null)
+            return "";
+        return dataInicio.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
 }

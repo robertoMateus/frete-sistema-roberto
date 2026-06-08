@@ -205,8 +205,11 @@ public class Frete {
     public void setValorFrete(BigDecimal valorFrete) {
         this.valorFrete = valorFrete;
     }
-    
-    
 
-    
+    public String getDataPrevisaoEntregaFormatada() {
+        if (dataPrevisaoEntrega == null)
+            return "";
+        return dataPrevisaoEntrega.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+    }
+
 }
