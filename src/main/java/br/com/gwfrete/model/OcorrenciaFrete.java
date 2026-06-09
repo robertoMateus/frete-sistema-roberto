@@ -1,6 +1,7 @@
 package br.com.gwfrete.model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class OcorrenciaFrete {
     private Long id;
@@ -12,6 +13,8 @@ public class OcorrenciaFrete {
     private String nomeRecebedor;
     private String documentoRecebedor;
     private Frete frete;
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public OcorrenciaFrete() {
     }
@@ -87,7 +90,9 @@ public class OcorrenciaFrete {
     public void setFrete(Frete frete) {
         this.frete = frete;
     }
-    
-    
+
+    public String getDataHoraFormatada() {
+        return dataHoraOcorrencia != null ? dataHoraOcorrencia.format(FORMATTER) : "";
+    }
 
 }

@@ -197,11 +197,23 @@ public class VeiculoBO {
         if (veiculo.getPlaca() == null || veiculo.getPlaca().trim().isEmpty()) {
             throw new CadastroException("A placa é obrigatória.");
         }
+        if (veiculo.getRntrc() == null || veiculo.getRntrc().trim().isEmpty()) {
+            throw new CadastroException("O RNTRC é obrigatório.");
+        }
+        if (veiculo.getAnoFabricacao() == null) {
+            throw new CadastroException("O ano de fabricação é obrigatório.");
+        }
         if (veiculo.getTipoVeiculo() == null) {
             throw new CadastroException("O tipo de veículo é obrigatório.");
         }
+        if (veiculo.getTara() <= 0) {
+            throw new CadastroException("A tara deve ser maior que zero.");
+        }
         if (veiculo.getCapacidadeCarga() <= 0) {
             throw new CadastroException("A capacidade de carga deve ser maior que zero.");
+        }
+        if (veiculo.getVolume() <= 0) {
+            throw new CadastroException("O volume deve ser maior que zero.");
         }
     }
 

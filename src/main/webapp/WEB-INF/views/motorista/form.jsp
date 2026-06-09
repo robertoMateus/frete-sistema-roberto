@@ -62,8 +62,8 @@
                                         required />
                                 </div>
                                 <div class="form-group">
-                                    <label>Telefone</label>
-                                    <input type="text" name="telefone" id="telefone" maxlength="20"
+                                    <label>Telefone <span class="obrigatorio">*</span></label>
+                                    <input type="text" name="telefone" id="telefone" maxlength="20" required
                                         placeholder="(00) 00000-0000" value="${motorista.telefone}" />
                                 </div>
                                 <c:if test="${not empty motorista.id}">

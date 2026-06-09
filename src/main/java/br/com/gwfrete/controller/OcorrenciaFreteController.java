@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -144,7 +145,12 @@ public class OcorrenciaFreteController extends HttpServlet {
         String dataHoraParam = req.getParameter("dataHoraOcorrencia");
         if (dataHoraParam != null && !dataHoraParam.isEmpty()) {
             try {
-                ocorrencia.setDataHoraOcorrencia(LocalDateTime.parse(dataHoraParam));
+                DateTimeFormatter fmtMin = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+                if (dataHoraParam.length() == 16) {
+                    ocorrencia.setDataHoraOcorrencia(LocalDateTime.parse(dataHoraParam, fmtMin));
+                } else {
+                    ocorrencia.setDataHoraOcorrencia(LocalDateTime.parse(dataHoraParam));
+                }
             } catch (Exception e) {
             }
         }

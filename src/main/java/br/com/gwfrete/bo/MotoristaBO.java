@@ -185,6 +185,9 @@ public class MotoristaBO {
         if (motorista.getDataNascimento() == null) {
             throw new CadastroException("A data de nascimento é obrigatória.");
         }
+        if(motorista.getTelefone() == null || motorista.getTelefone().trim().isEmpty()){
+            throw new CadastroException("O telefone é obrigatório");
+        }
         if (motorista.getNumeroCnh() == null || motorista.getNumeroCnh().trim().isEmpty()) {
             throw new CadastroException("O número da CNH é obrigatório.");
         }

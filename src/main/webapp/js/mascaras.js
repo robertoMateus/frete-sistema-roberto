@@ -61,3 +61,32 @@ function aplicarMascaraCep(id) {
     el.addEventListener('input', function () { this.value = formatar(this.value); });
     el.value = formatar(el.value);
 }
+
+function aplicarMascaraAno(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').substring(0, 4);
+    });
+}
+
+function aplicarMascaraDecimal(id, maxDigitos) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function () {
+        let valor = this.value.replace(/[^0-9.,]/g, '');
+        const primeiraSeparacao = valor.search(/[.,]/);
+        if (primeiraSeparacao !== -1) {
+            const antes = valor.slice(0, primeiraSeparacao + 1);
+            const depois = valor.slice(primeiraSeparacao + 1).replace(/[.,]/g, '');
+            valor = antes + depois;
+        }
+        if (valor.length > maxDigitos) {
+            valor = valor.substring(0, maxDigitos);
+        }
+        this.value = valor;
+    });
+    el.addEventListener('blur', function () {
+        this.value = this.value.replace(',', '.');
+    });
+}

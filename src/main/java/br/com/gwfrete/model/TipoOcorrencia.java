@@ -1,13 +1,24 @@
 package br.com.gwfrete.model;
 
 public enum TipoOcorrencia {
-    SAIDA_PATIO,
-    EM_ROTA,
-    TENTATIVA_ENTREGA,
-    ENTREGA_REALIZADA,
-    AVARIA,
-    EXTRAVIO,
-    OUTROS;
+    SAIDA_PATIO("Saida do pátio"),
+    EM_ROTA("Em rota"),
+    TENTATIVA_ENTREGA("Tentativa de entrega"),
+    ENTREGA_REALIZADA("Entrega realizada"),
+    AVARIA("Avaria"),
+    EXTRAVIO("Extravio"),
+    OUTROS("Outros");
+
+    private final String descricao;
+
+    TipoOcorrencia(String descricao){
+        this.descricao = descricao;
+    }
+    
+    public String getDescricao() {
+        return descricao;
+    }
+
 
     public static TipoOcorrencia fromString(String tipo) {
         for (TipoOcorrencia t : TipoOcorrencia.values()) {

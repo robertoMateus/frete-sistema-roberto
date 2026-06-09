@@ -91,11 +91,11 @@ public class VeiculoController extends HttpServlet {
             req.setAttribute("totalPaginas", totalPaginas);
             req.setAttribute("total", total);
 
-            req.getRequestDispatcher("/WEB-INF/views/veiculo/lista.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/veiculo/listar.jsp").forward(req, resp);
 
         } catch (NegocioException e) {
             req.setAttribute("erro", e.getMessage());
-            req.getRequestDispatcher("/WEB-INF/views/veiculo/lista.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/veiculo/listar.jsp").forward(req, resp);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro inesperado ao listar veículos.", e);
             resp.sendRedirect(req.getContextPath() + "/erro");
@@ -228,7 +228,7 @@ public class VeiculoController extends HttpServlet {
         String tara = req.getParameter("tara");
         if (tara != null && !tara.isEmpty()) {
             try {
-                veiculo.setTara(Double.parseDouble(tara));
+                veiculo.setTara(Double.parseDouble(tara.replace(',', '.')));
             } catch (NumberFormatException e) {
             }
         }
@@ -236,7 +236,7 @@ public class VeiculoController extends HttpServlet {
         String capacidade = req.getParameter("capacidadeCarga");
         if (capacidade != null && !capacidade.isEmpty()) {
             try {
-                veiculo.setCapacidadeCarga(Double.parseDouble(capacidade));
+                veiculo.setCapacidadeCarga(Double.parseDouble(capacidade.replace(',', '.')));
             } catch (NumberFormatException e) {
             }
         }
@@ -244,7 +244,7 @@ public class VeiculoController extends HttpServlet {
         String volume = req.getParameter("volume");
         if (volume != null && !volume.isEmpty()) {
             try {
-                veiculo.setVolume(Double.parseDouble(volume));
+                veiculo.setVolume(Double.parseDouble(volume.replace(',', '.')));
             } catch (NumberFormatException e) {
             }
         }

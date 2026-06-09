@@ -91,3 +91,8 @@ INSERT INTO tabela_frete (municipio_origem, uf_origem, municipio_destino, uf_des
 ('Goiânia', 'GO', 'Fortaleza', 'CE', 1800.00, 0.40),
 ('Salvador', 'BA', 'Rio de Janeiro', 'RJ', 1600.00, 0.38),
 ('Rio de Janeiro', 'RJ', 'Porto Alegre', 'RS', 1800.00, 0.42);
+
+-- Sincroniza a sequence com o último frete inserido
+SELECT setval('seq_frete_numero', (
+    SELECT MAX(CAST(SPLIT_PART(numero, '-', 3) AS INTEGER)) FROM frete
+));

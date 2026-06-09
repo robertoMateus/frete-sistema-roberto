@@ -3,6 +3,8 @@ package br.com.gwfrete.controller;
 import br.com.gwfrete.bo.ClienteBO;
 import br.com.gwfrete.bo.FreteBO;
 import br.com.gwfrete.bo.MotoristaBO;
+import br.com.gwfrete.bo.OcorrenciaFreteBO;
+import br.com.gwfrete.model.OcorrenciaFrete;
 import br.com.gwfrete.bo.VeiculoBO;
 import br.com.gwfrete.exception.NegocioException;
 import br.com.gwfrete.model.Cliente;
@@ -29,6 +31,7 @@ public class FreteController extends HttpServlet {
     private final ClienteBO clienteBO = new ClienteBO();
     private final MotoristaBO motoristaBO = new MotoristaBO();
     private final VeiculoBO veiculoBO = new VeiculoBO();
+    private final OcorrenciaFreteBO ocorrenciaBO = new OcorrenciaFreteBO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -107,11 +110,11 @@ public class FreteController extends HttpServlet {
             req.setAttribute("totalPaginas", totalPaginas);
             req.setAttribute("total", total);
 
-            req.getRequestDispatcher("/WEB-INF/views/frete/lista.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/frete/listar.jsp").forward(req, resp);
 
         } catch (NegocioException e) {
             req.setAttribute("erro", e.getMessage());
-            req.getRequestDispatcher("/WEB-INF/views/frete/lista.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/frete/listar.jsp").forward(req, resp);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro inesperado ao listar fretes.", e);
             resp.sendRedirect(req.getContextPath() + "/erro");
@@ -142,6 +145,13 @@ public class FreteController extends HttpServlet {
             Frete frete = freteBO.buscarPorId(id);
 
             req.setAttribute("frete", frete);
+            try {
+                java.util.List<OcorrenciaFrete> ocorrencias = ocorrenciaBO.listarPorFrete(id);
+                req.setAttribute("ocorrencias", ocorrencias);
+            } catch (Exception ex) {
+                req.setAttribute("ocorrencias", new java.util.ArrayList<>());
+            }
+
             req.getRequestDispatcher("/WEB-INF/views/frete/detalhe.jsp").forward(req, resp);
 
         } catch (NegocioException e) {

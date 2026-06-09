@@ -2,6 +2,7 @@ package br.com.gwfrete.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Frete {
     private Long id;
@@ -26,6 +27,8 @@ public class Frete {
     private LocalDateTime dataSaida;
     private LocalDateTime dataEntrega;
     private StatusFrete status;
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public Frete() {
     }
@@ -210,6 +213,18 @@ public class Frete {
         if (dataPrevisaoEntrega == null)
             return "";
         return dataPrevisaoEntrega.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+    }
+
+    public String getDataEmissaoFormatada() {
+        return dataEmissao != null ? dataEmissao.format(FORMATTER) : "";
+    }
+
+    public String getDataSaidaFormatada() {
+        return dataSaida != null ? dataSaida.format(FORMATTER) : "";
+    }
+
+    public String getDataEntregaFormatada() {
+        return dataEntrega != null ? dataEntrega.format(FORMATTER) : "";
     }
 
 }

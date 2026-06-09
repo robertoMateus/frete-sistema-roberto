@@ -386,6 +386,17 @@ tbody tr:hover {
     font-size: 0.875rem;
 }
 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 20px;

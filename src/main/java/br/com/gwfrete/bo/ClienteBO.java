@@ -148,6 +148,36 @@ public class ClienteBO {
         if (cliente.getCnpj() == null || cliente.getCnpj().trim().isEmpty()) {
             throw new CadastroException("O CNPJ é obrigatório.");
         }
+        if (cliente.getNomeFantasia() == null || cliente.getNomeFantasia().trim().isEmpty()) {
+            throw new CadastroException("O nome fantasia é obrigatório.");
+        }
+        if (cliente.getInscricaoEstadual() == null || cliente.getInscricaoEstadual().trim().isEmpty()) {
+            throw new CadastroException("A inscrição estadual é obrigatória.");
+        }
+        if (cliente.getLogradouro() == null || cliente.getLogradouro().trim().isEmpty()) {
+            throw new CadastroException("O logradouro é obrigatório.");
+        }
+        if (cliente.getNumero() == null || cliente.getNumero().trim().isEmpty()) {
+            throw new CadastroException("O número é obrigatório.");
+        }
+        if (cliente.getBairro() == null || cliente.getBairro().trim().isEmpty()) {
+            throw new CadastroException("O bairro é obrigatório.");
+        }
+        if (cliente.getMunicipio() == null || cliente.getMunicipio().trim().isEmpty()) {
+            throw new CadastroException("O município é obrigatório.");
+        }
+        if (cliente.getUf() == null || cliente.getUf().trim().isEmpty()) {
+            throw new CadastroException("A UF é obrigatória.");
+        }
+        if (cliente.getCep() == null || cliente.getCep().trim().isEmpty()) {
+            throw new CadastroException("O CEP é obrigatório.");
+        }
+        if (cliente.getTelefone() == null || cliente.getTelefone().trim().isEmpty()) {
+            throw new CadastroException("O telefone é obrigatório.");
+        }
+        if (cliente.getEmail() == null || cliente.getEmail().trim().isEmpty()) {
+            throw new CadastroException("O e-mail é obrigatório.");
+        }
         if (cliente.getStatus() == null) {
             cliente.setStatus(StatusCliente.ATIVO);
         }

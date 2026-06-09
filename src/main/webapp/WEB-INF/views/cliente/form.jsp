@@ -44,9 +44,11 @@
                                         required />
                                 </div>
                                 <div class="form-group">
-                                    <label>Nome Fantasia</label>
-                                    <input type="text" name="nomeFantasia" maxlength="150"
-                                        value="${cliente.nomeFantasia}" />
+                                    <div class="form-group">
+                                        <label>Nome Fantasia <span class="obrigatorio">*</span></label>
+                                        <input type="text" name="nomeFantasia" maxlength="150"
+                                            value="${cliente.nomeFantasia}" required />
+                                    </div>
                                 </div>
                             </div>
 
@@ -57,9 +59,11 @@
                                         placeholder="00.000.000/0000-00" value="${cliente.cnpjFormatado}" required />
                                 </div>
                                 <div class="form-group">
-                                    <label>Inscrição Estadual</label>
-                                    <input type="text" name="inscricaoEstadual" maxlength="20"
-                                        value="${cliente.inscricaoEstadual}" />
+                                    <div class="form-group">
+                                        <label>Inscrição Estadual <span class="obrigatorio">*</span></label>
+                                        <input type="text" name="inscricaoEstadual" maxlength="20"
+                                            value="${cliente.inscricaoEstadual}" required />
+                                    </div>
                                 </div>
                                 <c:if test="${not empty cliente.id}">
                                     <div class="form-group">
@@ -76,13 +80,14 @@
 
                                 <div class="form-row col-4">
                                     <div class="form-group">
-                                        <label>Logradouro</label>
+                                        <label>Logradouro <span class="obrigatorio">*</span></label>
                                         <input type="text" name="logradouro" maxlength="150"
-                                            value="${cliente.logradouro}" />
+                                            value="${cliente.logradouro}" required />
                                     </div>
                                     <div class="form-group">
-                                        <label>Número</label>
-                                        <input type="text" name="numero" maxlength="20" value="${cliente.numero}" />
+                                        <label>Número <span class="obrigatorio">*</span></label>
+                                        <input type="text" name="numero" maxlength="20" value="${cliente.numero}"
+                                            required />
                                     </div>
                                     <div class="form-group">
                                         <label>Complemento</label>
@@ -90,20 +95,21 @@
                                             value="${cliente.complemento}" />
                                     </div>
                                     <div class="form-group">
-                                        <label>Bairro</label>
-                                        <input type="text" name="bairro" maxlength="100" value="${cliente.bairro}" />
+                                        <label>Bairro <span class="obrigatorio">*</span></label>
+                                        <input type="text" name="bairro" maxlength="100" value="${cliente.bairro}"
+                                            required />
                                     </div>
                                 </div>
 
                                 <div class="form-row col-endereco">
                                     <div class="form-group">
-                                        <label>Município</label>
-                                        <input type="text" name="municipio" maxlength="100"
-                                            value="${cliente.municipio}" />
+                                        <label>Município <span class="obrigatorio">*</span></label>
+                                        <input type="text" name="municipio" maxlength="100" value="${cliente.municipio}"
+                                            required />
                                     </div>
                                     <div class="form-group">
-                                        <label>UF</label>
-                                        <select name="uf">
+                                        <label>UF <span class="obrigatorio">*</span></label>
+                                        <select name="uf" required>
                                             <option value="">Selecione</option>
                                             <c:forEach var="uf"
                                                 items="${['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']}">
@@ -113,9 +119,9 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label>CEP</label>
+                                        <label>CEP <span class="obrigatorio">*</span></label>
                                         <input type="text" name="cep" id="cep" maxlength="9" placeholder="00000-000"
-                                            value="${cliente.cep}" />
+                                            value="${cliente.cep}" required />
                                     </div>
                                 </div>
                             </div>
@@ -126,13 +132,14 @@
 
                                     <div class="form-row col-2">
                                         <div class="form-group">
-                                            <label>Telefone</label>
+                                            <label>Telefone <span class="obrigatorio">*</span></label>
                                             <input type="text" name="telefone" id="telefone" maxlength="20"
-                                                placeholder="(00) 00000-0000" value="${cliente.telefone}" />
+                                                placeholder="(00) 00000-0000" value="${cliente.telefone}" required />
                                         </div>
                                         <div class="form-group">
-                                            <label>E-mail</label>
-                                            <input type="email" name="email" maxlength="150" value="${cliente.email}" />
+                                            <label>E-mail <span class="obrigatorio">*</span></label>
+                                            <input type="email" name="email" maxlength="150" value="${cliente.email}"
+                                                required />
                                         </div>
                                     </div>
                                 </div>
