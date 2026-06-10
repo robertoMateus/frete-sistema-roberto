@@ -65,6 +65,9 @@ public class MotoristaController extends HttpServlet {
             case "/excluir":
                 excluir(req, resp);
                 break;
+            case "/ativar":
+                ativar(req, resp);
+                break;
             default:
                 resp.sendRedirect(req.getContextPath() + "/motoristas/listar");
         }
@@ -173,6 +176,22 @@ public class MotoristaController extends HttpServlet {
             listar(req, resp);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro inesperado ao inativar motorista.", e);
+            resp.sendRedirect(req.getContextPath() + "/erro");
+        }
+    }
+
+    private void ativar(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            Long id = Long.parseLong(req.getParameter("id"));
+            motoristaBO.ativar(id);
+            resp.sendRedirect(req.getContextPath() + "/motoristas/listar?sucesso=ativado");
+
+        } catch (NegocioException e) {
+            req.setAttribute("erro", e.getMessage());
+            listar(req, resp);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro inesperado ao ativar motorista.", e);
             resp.sendRedirect(req.getContextPath() + "/erro");
         }
     }

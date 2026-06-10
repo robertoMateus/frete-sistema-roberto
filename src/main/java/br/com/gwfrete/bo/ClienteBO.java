@@ -139,6 +139,24 @@ public class ClienteBO {
         }
     }
 
+    public void ativar(Long id) throws ClienteException {
+        try (Connection conn = ConexaoPool.getConexao()) {
+            Cliente cliente = clienteDAO.buscarPorId(id, conn);
+            if (cliente == null) {
+                throw new ClienteException("Cliente não encontrado.");
+            }
+
+            cliente.setStatus(StatusCliente.ATIVO);
+            clienteDAO.atualizar(cliente, conn);
+
+        } catch (ClienteException e) {
+            throw e;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao ativar cliente.", e);
+            throw new ClienteException("Erro inesperado ao ativar cliente.");
+        }
+    }
+
     // validações privadas
 
     private void validarCamposObrigatorios(Cliente cliente) throws CadastroException {

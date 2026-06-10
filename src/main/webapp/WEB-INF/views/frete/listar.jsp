@@ -80,22 +80,24 @@
                                                             class="badge badge-emitido">${frete.status.descricao}</span>
                                                     </c:when>
                                                     <c:when test="${frete.status.name() == 'SAIDA_CONFIRMADA'}">
-                                                        <span class="badge badge-saida">${frete.status.descricao}</span>
+                                                        <span
+                                                            class="badge badge-saida-confirmada">${frete.status.descricao}</span>
                                                     </c:when>
                                                     <c:when test="${frete.status.name() == 'EM_TRANSITO'}">
                                                         <span
-                                                            class="badge badge-transito">${frete.status.descricao}</span>
+                                                            class="badge badge-saida-confirmada">${frete.status.descricao}</span>
                                                     </c:when>
                                                     <c:when test="${frete.status.name() == 'ENTREGUE'}">
-                                                        <span class="badge badge-ativo">${frete.status.descricao}</span>
+                                                        <span
+                                                            class="badge badge-entregue">${frete.status.descricao}</span>
                                                     </c:when>
                                                     <c:when test="${frete.status.name() == 'NAO_ENTREGUE'}">
                                                         <span
-                                                            class="badge badge-suspenso">${frete.status.descricao}</span>
+                                                            class="badge badge-nao-entregue">${frete.status.descricao}</span>
                                                     </c:when>
                                                     <c:when test="${frete.status.name() == 'CANCELADO'}">
                                                         <span
-                                                            class="badge badge-inativo">${frete.status.descricao}</span>
+                                                            class="badge badge-cancelado">${frete.status.descricao}</span>
                                                     </c:when>
                                                 </c:choose>
                                             </td>

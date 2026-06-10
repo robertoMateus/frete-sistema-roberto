@@ -90,3 +90,12 @@ function aplicarMascaraDecimal(id, maxDigitos) {
         this.value = this.value.replace(',', '.');
     });
 }
+
+function aplicarMascaraCnh(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').substring(0, 11);
+    });
+    el.value = el.value.replace(/\D/g, '').substring(0, 11);
+}

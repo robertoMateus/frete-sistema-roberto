@@ -146,7 +146,7 @@ public class FreteController extends HttpServlet {
 
             req.setAttribute("frete", frete);
             try {
-                java.util.List<OcorrenciaFrete> ocorrencias = ocorrenciaBO.listarPorFrete(id);
+                List<OcorrenciaFrete> ocorrencias = ocorrenciaBO.listarPorFrete(id);
                 req.setAttribute("ocorrencias", ocorrencias);
             } catch (Exception ex) {
                 req.setAttribute("ocorrencias", new java.util.ArrayList<>());

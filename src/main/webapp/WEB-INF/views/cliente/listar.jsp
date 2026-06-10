@@ -29,6 +29,7 @@
                 <c:when test="${param.sucesso == 'cadastrado'}">Cliente cadastrado com sucesso.</c:when>
                 <c:when test="${param.sucesso == 'atualizado'}">Cliente atualizado com sucesso.</c:when>
                 <c:when test="${param.sucesso == 'inativado'}">Cliente inativado com sucesso.</c:when>
+                <c:when test="${param.sucesso == 'ativado'}">Cliente ativado com sucesso.</c:when>
                 <c:when test="${param.sucesso == 'excluido'}">Cliente excluído com sucesso.</c:when>
             </c:choose>
         </div>
@@ -95,14 +96,24 @@
                                     <div class="acoes">
                                         <a href="${pageContext.request.contextPath}/cliente/editar?id=${cliente.id}"
                                            class="btn btn-secondary btn-sm">Editar</a>
-                                        <c:if test="${cliente.status.name() == 'ATIVO'}">
-                                            <form method="post" action="${pageContext.request.contextPath}/cliente/inativar"
-                                                  style="display:inline"
-                                                  onsubmit="return confirm('Deseja inativar este cliente?')">
-                                                <input type="hidden" name="id" value="${cliente.id}" />
-                                                <button type="submit" class="btn btn-secondary btn-sm">Inativar</button>
-                                            </form>
-                                        </c:if>
+                                        <c:choose>
+                                            <c:when test="${cliente.status.name() == 'ATIVO'}">
+                                                <form method="post" action="${pageContext.request.contextPath}/cliente/inativar"
+                                                      style="display:inline"
+                                                      onsubmit="return confirm('Deseja inativar este cliente?')">
+                                                    <input type="hidden" name="id" value="${cliente.id}" />
+                                                    <button type="submit" class="btn btn-secondary btn-sm">Inativar</button>
+                                                </form>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <form method="post" action="${pageContext.request.contextPath}/cliente/ativar"
+                                                      style="display:inline"
+                                                      onsubmit="return confirm('Deseja ativar este cliente?')">
+                                                    <input type="hidden" name="id" value="${cliente.id}" />
+                                                    <button type="submit" class="btn btn-primary btn-sm">Ativar</button>
+                                                </form>
+                                            </c:otherwise>
+                                        </c:choose>
                                         <form method="post" action="${pageContext.request.contextPath}/cliente/excluir"
                                               style="display:inline"
                                               onsubmit="return confirm('Deseja excluir este cliente?')">

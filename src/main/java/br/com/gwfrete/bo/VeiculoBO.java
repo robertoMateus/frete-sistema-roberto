@@ -54,6 +54,12 @@ public class VeiculoBO {
         validarFormatos(veiculo);
 
         try (Connection conn = ConexaoPool.getConexao()) {
+            // Busca o veículo existente para preservar o status atual
+            Veiculo existente = veiculoDAO.buscarPorId(veiculo.getId(), conn);
+            if (existente == null) {
+                throw new VeiculoException("Veículo não encontrado.");
+            }
+
             Veiculo existentePlaca = veiculoDAO.buscarPorPlaca(veiculo.getPlaca(), conn);
             if (existentePlaca != null && !existentePlaca.getId().equals(veiculo.getId())) {
                 throw new CadastroException("A placa informada já está cadastrada para outro veículo.");
@@ -66,6 +72,8 @@ public class VeiculoBO {
                 }
             }
 
+            // Garante que a edição de dados cadastrais nunca altera o status
+            veiculo.setStatus(existente.getStatus());
             veiculoDAO.atualizar(veiculo, conn);
 
         } catch (CadastroException e) {
@@ -86,14 +94,14 @@ public class VeiculoBO {
             if (veiculo.getStatus() == StatusVeiculo.EM_VIAGEM) {
                 throw new VeiculoException(
                         "Não é permitido alterar o status para Disponível manualmente " +
-                        "enquanto o veículo estiver em viagem. O status é atualizado " +
-                        "automaticamente ao concluir o frete.");
+                                "enquanto o veículo estiver em viagem. O status é atualizado " +
+                                "automaticamente ao concluir o frete.");
             }
 
-            if (manutencaoDAO.possuiManutencaoEmAberto(id, conn)) {
+            if (manutencaoDAO.possuiManutencaoEmAberto(id, null, conn)) {
                 throw new VeiculoException(
                         "Não é permitido alterar o status para Disponível enquanto " +
-                        "houver manutenção em aberto.");
+                                "houver manutenção em aberto.");
             }
 
             veiculoDAO.atualizarStatus(id, StatusVeiculo.DISPONIVEL, conn);
@@ -106,27 +114,28 @@ public class VeiculoBO {
         }
     }
 
-    public void alterarStatusParaManutencao(Long id) throws VeiculoException {
-        try (Connection conn = ConexaoPool.getConexao()) {
-            Veiculo veiculo = veiculoDAO.buscarPorId(id, conn);
-            if (veiculo == null) {
-                throw new VeiculoException("Veículo não encontrado.");
-            }
+    // public void alterarStatusParaManutencao(Long id) throws VeiculoException {
+    // try (Connection conn = ConexaoPool.getConexao()) {
+    // Veiculo veiculo = veiculoDAO.buscarPorId(id, conn);
+    // if (veiculo == null) {
+    // throw new VeiculoException("Veículo não encontrado.");
+    // }
 
-            if (veiculo.getStatus() == StatusVeiculo.EM_VIAGEM) {
-                throw new VeiculoException(
-                        "Não é permitido colocar em manutenção um veículo que está em viagem.");
-            }
+    // if (veiculo.getStatus() == StatusVeiculo.EM_VIAGEM) {
+    // throw new VeiculoException(
+    // "Não é permitido colocar em manutenção um veículo que está em viagem.");
+    // }
 
-            veiculoDAO.atualizarStatus(id, StatusVeiculo.EM_MANUTENCAO, conn);
+    // veiculoDAO.atualizarStatus(id, StatusVeiculo.EM_MANUTENCAO, conn);
 
-        } catch (VeiculoException e) {
-            throw e;
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erro ao alterar status do veículo para manutenção.", e);
-            throw new VeiculoException("Erro inesperado ao alterar status do veículo.");
-        }
-    }
+    // } catch (VeiculoException e) {
+    // throw e;
+    // } catch (SQLException e) {
+    // LOGGER.log(Level.SEVERE, "Erro ao alterar status do veículo para
+    // manutenção.", e);
+    // throw new VeiculoException("Erro inesperado ao alterar status do veículo.");
+    // }
+    // }
 
     public void excluir(Long id) throws VeiculoException {
         try (Connection conn = ConexaoPool.getConexao()) {
@@ -143,6 +152,11 @@ public class VeiculoBO {
             if (veiculoDAO.possuiFreteEmTransito(id, conn)) {
                 throw new VeiculoException(
                         "Não é permitido excluir um veículo com fretes vinculados.");
+            }
+
+            if (manutencaoDAO.possuiManutencaoEmAberto(id, null, conn)) {
+                throw new VeiculoException(
+                        "Não é permitido excluir um veículo com manutenção em aberto.");
             }
 
             veiculoDAO.excluir(id, conn);
@@ -227,7 +241,7 @@ public class VeiculoBO {
         if (!mercosul && !antigo) {
             throw new CadastroException(
                     "A placa informada é inválida. Use o formato Mercosul (ABC1D23) " +
-                    "ou o formato antigo (ABC1234).");
+                            "ou o formato antigo (ABC1234).");
         }
 
         veiculo.setPlaca(placa);

@@ -77,4 +77,10 @@ public class ManutencaoVeiculo {
         return dataInicio.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
+    public String getDataFimFormatada() {
+        if (dataFim == null)
+            return "Em andamento";
+        return dataFim.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
 }

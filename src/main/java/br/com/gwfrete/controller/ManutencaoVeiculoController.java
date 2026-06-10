@@ -23,6 +23,7 @@ public class ManutencaoVeiculoController extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(ManutencaoVeiculoController.class.getName());
     private final ManutencaoVeiculoBO manutencaoBO = new ManutencaoVeiculoBO();
     private final VeiculoBO veiculoBO = new VeiculoBO();
+    private static final int ITENS_POR_PAGINA = 10;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -68,25 +69,39 @@ public class ManutencaoVeiculoController extends HttpServlet {
     private void listar(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
+            int pagina = 1;
+            if (req.getParameter("pagina") != null) {
+                try {
+                    pagina = Integer.parseInt(req.getParameter("pagina"));
+                } catch (NumberFormatException e) {
+                    pagina = 1;
+                }
+            }
             String idVeiculoParam = req.getParameter("idVeiculo");
-
             if (idVeiculoParam != null && !idVeiculoParam.isEmpty()) {
                 Long idVeiculo = Long.parseLong(idVeiculoParam);
                 Veiculo veiculo = veiculoBO.buscarPorId(idVeiculo);
-                List<ManutencaoVeiculo> manutencoes = manutencaoBO.listarPorVeiculo(idVeiculo);
-
+                List<ManutencaoVeiculo> manutencoes = manutencaoBO.listarPorVeiculo(idVeiculo, pagina,
+                        ITENS_POR_PAGINA);
+                int total = manutencaoBO.contarPorVeiculo(idVeiculo);
+                int totalPaginas = (int) Math.ceil((double) total / ITENS_POR_PAGINA);
                 req.setAttribute("veiculo", veiculo);
                 req.setAttribute("manutencoes", manutencoes);
+                req.setAttribute("total", total);
+                req.setAttribute("totalPaginas", totalPaginas);
             } else {
-                List<ManutencaoVeiculo> manutencoes = manutencaoBO.listarEmAberto();
+                List<ManutencaoVeiculo> manutencoes = manutencaoBO.listarEmAberto(pagina, ITENS_POR_PAGINA);
+                int total = manutencaoBO.contarEmAberto();
+                int totalPaginas = (int) Math.ceil((double) total / ITENS_POR_PAGINA);
                 req.setAttribute("manutencoes", manutencoes);
+                req.setAttribute("total", total);
+                req.setAttribute("totalPaginas", totalPaginas);
             }
-
-            req.getRequestDispatcher("/WEB-INF/views/manutencao/lista.jsp").forward(req, resp);
-
+            req.setAttribute("paginaAtual", pagina);
+            req.getRequestDispatcher("/WEB-INF/views/manutencoes/listar.jsp").forward(req, resp);
         } catch (NegocioException e) {
             req.setAttribute("erro", e.getMessage());
-            req.getRequestDispatcher("/WEB-INF/views/manutencao/lista.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/manutencoes/listar.jsp").forward(req, resp);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro inesperado ao listar manutenções.", e);
             resp.sendRedirect(req.getContextPath() + "/erro");
@@ -105,7 +120,7 @@ public class ManutencaoVeiculoController extends HttpServlet {
             }
 
             req.setAttribute("tiposManutencao", TipoManutencao.values());
-            req.getRequestDispatcher("/WEB-INF/views/manutencao/form.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/manutencoes/form.jsp").forward(req, resp);
 
         } catch (NegocioException e) {
             req.setAttribute("erro", e.getMessage());
@@ -124,7 +139,7 @@ public class ManutencaoVeiculoController extends HttpServlet {
 
             req.setAttribute("manutencao", manutencao);
             req.setAttribute("tiposManutencao", TipoManutencao.values());
-            req.getRequestDispatcher("/WEB-INF/views/manutencao/form.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/manutencoes/form.jsp").forward(req, resp);
 
         } catch (NegocioException e) {
             req.setAttribute("erro", e.getMessage());
@@ -141,7 +156,8 @@ public class ManutencaoVeiculoController extends HttpServlet {
             ManutencaoVeiculo manutencao = extrairManutencao(req);
             manutencaoBO.registrar(manutencao);
             Long idVeiculo = manutencao.getVeiculo().getId();
-            resp.sendRedirect(req.getContextPath() + "/manutencoes/listar?idVeiculo=" + idVeiculo + "&sucesso=registrado");
+            resp.sendRedirect(
+                    req.getContextPath() + "/manutencoes/listar?idVeiculo=" + idVeiculo + "&sucesso=registrado");
 
         } catch (NegocioException e) {
             req.setAttribute("erro", e.getMessage());
@@ -154,7 +170,7 @@ public class ManutencaoVeiculoController extends HttpServlet {
                 }
             } catch (NegocioException ex) {
             }
-            req.getRequestDispatcher("/WEB-INF/views/manutencao/form.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/manutencoes/form.jsp").forward(req, resp);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro inesperado ao registrar manutenção.", e);
             resp.sendRedirect(req.getContextPath() + "/erro");
@@ -168,13 +184,14 @@ public class ManutencaoVeiculoController extends HttpServlet {
             manutencao.setId(Long.parseLong(req.getParameter("id")));
             manutencaoBO.atualizar(manutencao);
             Long idVeiculo = manutencao.getVeiculo().getId();
-            resp.sendRedirect(req.getContextPath() + "/manutencoes/listar?idVeiculo=" + idVeiculo + "&sucesso=atualizado");
+            resp.sendRedirect(
+                    req.getContextPath() + "/manutencoes/listar?idVeiculo=" + idVeiculo + "&sucesso=atualizado");
 
         } catch (NegocioException e) {
             req.setAttribute("erro", e.getMessage());
             req.setAttribute("manutencao", extrairManutencaoSemValidacao(req));
             req.setAttribute("tiposManutencao", TipoManutencao.values());
-            req.getRequestDispatcher("/WEB-INF/views/manutencao/form.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/manutencoes/form.jsp").forward(req, resp);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro inesperado ao atualizar manutenção.", e);
             resp.sendRedirect(req.getContextPath() + "/erro");

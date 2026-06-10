@@ -57,9 +57,9 @@ public class VeiculoController extends HttpServlet {
             case "/disponivel":
                 alterarParaDisponivel(req, resp);
                 break;
-            case "/manutencao":
-                alterarParaManutencao(req, resp);
-                break;
+            // case "/manutencao":
+            //     alterarParaManutencao(req, resp);
+            //     break;
             case "/excluir":
                 excluir(req, resp);
                 break;
@@ -172,21 +172,21 @@ public class VeiculoController extends HttpServlet {
         }
     }
 
-    private void alterarParaManutencao(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        try {
-            Long id = Long.parseLong(req.getParameter("id"));
-            veiculoBO.alterarStatusParaManutencao(id);
-            resp.sendRedirect(req.getContextPath() + "/veiculos/listar?sucesso=manutencao");
+    // private void alterarParaManutencao(HttpServletRequest req, HttpServletResponse resp)
+    //         throws ServletException, IOException {
+    //     try {
+    //         Long id = Long.parseLong(req.getParameter("id"));
+    //         veiculoBO.alterarStatusParaManutencao(id);
+    //         resp.sendRedirect(req.getContextPath() + "/veiculos/listar?sucesso=manutencao");
 
-        } catch (NegocioException e) {
-            req.setAttribute("erro", e.getMessage());
-            listar(req, resp);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erro inesperado ao alterar status do veículo para manutenção.", e);
-            resp.sendRedirect(req.getContextPath() + "/erro");
-        }
-    }
+    //     } catch (NegocioException e) {
+    //         req.setAttribute("erro", e.getMessage());
+    //         listar(req, resp);
+    //     } catch (Exception e) {
+    //         LOGGER.log(Level.SEVERE, "Erro inesperado ao alterar status do veículo para manutenção.", e);
+    //         resp.sendRedirect(req.getContextPath() + "/erro");
+    //     }
+    // }
 
     private void excluir(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

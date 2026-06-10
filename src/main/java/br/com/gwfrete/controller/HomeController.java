@@ -32,11 +32,11 @@ public class HomeController extends HttpServlet {
             int totalAtrasados = freteBO.contarAtrasados();
 
             List<Frete> ultimosFretes = freteBO.listarEmAberto();
-            if (ultimosFretes.size() > 5) {
-                ultimosFretes = ultimosFretes.subList(0, 5);
-            }
+            // if (ultimosFretes.size() > 5) {
+            //     ultimosFretes = ultimosFretes.subList(0, 5);
+            // }
 
-            List<ManutencaoVeiculo> manutencoesEmAberto = manutencaoBO.listarEmAberto();
+            List<ManutencaoVeiculo> manutencoesEmAberto = manutencaoBO.listarEmAberto(1, 5);
 
             req.setAttribute("totalEmitidos", totalEmitidos);
             req.setAttribute("totalSaidaConfirmada", totalSaidaConfirmada);

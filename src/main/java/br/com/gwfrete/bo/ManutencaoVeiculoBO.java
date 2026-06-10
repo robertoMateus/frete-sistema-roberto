@@ -82,7 +82,7 @@ public class ManutencaoVeiculoBO {
 
                 // Só retorna para DISPONIVEL se não houver outra manutenção em aberto
                 boolean outraManutencaoAberta = manutencaoDAO
-                        .possuiManutencaoEmAberto(veiculo.getId(), conn);
+                        .possuiManutencaoEmAberto(veiculo.getId(), manutencao.getId(), conn);
                 if (!outraManutencaoAberta) {
                     veiculoDAO.atualizarStatus(veiculo.getId(), StatusVeiculo.DISPONIVEL, conn);
                 }
@@ -119,7 +119,7 @@ public class ManutencaoVeiculoBO {
 
             manutencaoDAO.atualizar(manutencao, conn);
 
-        } catch (CadastroException  e) {
+        } catch (CadastroException e) {
             throw e;
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erro ao atualizar manutenção.", e);
@@ -127,20 +127,19 @@ public class ManutencaoVeiculoBO {
         }
     }
 
-    public List<ManutencaoVeiculo> listarPorVeiculo(Long idVeiculo) throws VeiculoException {
+    public List<ManutencaoVeiculo> listarPorVeiculo(Long idVeiculo, int pagina, int itensPorPagina)
+            throws VeiculoException {
         try (Connection conn = ConexaoPool.getConexao()) {
-            return manutencaoDAO.listarPorVeiculo(idVeiculo, conn);
-
+            return manutencaoDAO.listarPorVeiculo(idVeiculo, pagina, itensPorPagina, conn);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erro ao listar manutenções.", e);
             throw new VeiculoException("Erro inesperado ao listar manutenções.");
         }
     }
 
-    public List<ManutencaoVeiculo> listarEmAberto() throws VeiculoException {
+    public List<ManutencaoVeiculo> listarEmAberto(int pagina, int itensPorPagina) throws VeiculoException {
         try (Connection conn = ConexaoPool.getConexao()) {
-            return manutencaoDAO.listarEmAberto(conn);
-
+            return manutencaoDAO.listarEmAberto(pagina, itensPorPagina, conn);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erro ao listar manutenções em aberto.", e);
             throw new VeiculoException("Erro inesperado ao listar manutenções em aberto.");
@@ -160,6 +159,24 @@ public class ManutencaoVeiculoBO {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erro ao buscar manutenção.", e);
             throw new VeiculoException("Erro inesperado ao buscar manutenção.");
+        }
+    }
+
+    public int contarPorVeiculo(Long idVeiculo) throws VeiculoException {
+        try (Connection conn = ConexaoPool.getConexao()) {
+            return manutencaoDAO.contarPorVeiculo(idVeiculo, conn);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao contar manutenções do veículo.", e);
+            throw new VeiculoException("Erro inesperado ao contar manutenções.");
+        }
+    }
+
+    public int contarEmAberto() throws VeiculoException {
+        try (Connection conn = ConexaoPool.getConexao()) {
+            return manutencaoDAO.contarEmAberto(conn);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao contar manutenções em aberto.", e);
+            throw new VeiculoException("Erro inesperado ao contar manutenções em aberto.");
         }
     }
 

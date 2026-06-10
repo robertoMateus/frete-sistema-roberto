@@ -82,7 +82,7 @@
                                 <div class="form-row col-3">
                                     <div class="form-group">
                                         <label>Número da CNH <span class="obrigatorio">*</span></label>
-                                        <input type="text" name="numeroCnh" maxlength="20"
+                                        <input type="text" name="numeroCnh" maxlength="11"
                                             value="${motorista.numeroCnh}" required />
                                     </div>
                                     <div class="form-group">
@@ -145,6 +145,7 @@
             <script>
                 aplicarMascaraCpf('cpf');
                 aplicarMascaraTelefone('telefone');
+                aplicarMascaraCnh('numeroCnh');
             </script>
 
         </body>

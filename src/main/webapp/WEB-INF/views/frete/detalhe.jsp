@@ -96,8 +96,8 @@
                                             class="btn btn-warning">Registrar Não Entrega</a>
                                     </c:if>
 
-                                    <button type="button" class="btn btn-secondary" onclick="abrirModalOcorrencia()">+
-                                        Registrar Ocorrência</button>
+                                    <a href="${pageContext.request.contextPath}/ocorrencias/novo?idFrete=${frete.id}"
+                                        class="btn btn-secondary">+ Registrar Ocorrência</a>
 
                                 </div>
                             </div>
@@ -307,7 +307,7 @@
                     </div>
                 </div>
 
-                <%--  Registrar Ocorrencia--%>
+                <%-- Registrar Ocorrencia--%>
                     <div id="modalOcorrencia" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
          background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center;">
                         <div

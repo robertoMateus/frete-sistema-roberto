@@ -88,6 +88,24 @@ public class MotoristaBO {
         }
     }
 
+    public void ativar(Long id) throws MotoristaException {
+        try (Connection conn = ConexaoPool.getConexao()) {
+            Motorista motorista = motoristaDAO.buscarPorId(id, conn);
+            if (motorista == null) {
+                throw new MotoristaException("Motorista não encontrado.");
+            }
+
+            motorista.setStatus(StatusMotorista.ATIVO);
+            motoristaDAO.atualizar(motorista, conn);
+
+        } catch (MotoristaException e) {
+            throw e;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao ativar motorista.", e);
+            throw new MotoristaException("Erro inesperado ao ativar motorista.");
+        }
+    }
+
     public void suspender(Long id) throws MotoristaException {
         try (Connection conn = ConexaoPool.getConexao()) {
             Motorista motorista = motoristaDAO.buscarPorId(id, conn);
@@ -185,7 +203,7 @@ public class MotoristaBO {
         if (motorista.getDataNascimento() == null) {
             throw new CadastroException("A data de nascimento é obrigatória.");
         }
-        if(motorista.getTelefone() == null || motorista.getTelefone().trim().isEmpty()){
+        if (motorista.getTelefone() == null || motorista.getTelefone().trim().isEmpty()) {
             throw new CadastroException("O telefone é obrigatório");
         }
         if (motorista.getNumeroCnh() == null || motorista.getNumeroCnh().trim().isEmpty()) {
@@ -208,5 +226,11 @@ public class MotoristaBO {
             throw new CadastroException("O CPF informado é inválido.");
         }
         motorista.setCpf(cpfLimpo);
+
+        String cnhLimpa = motorista.getNumeroCnh().replaceAll("[^0-9]", "");
+        if (cnhLimpa.length() != 11) {
+            throw new CadastroException("O número da CNH deve conter 11 dígitos.");
+        }
+        motorista.setNumeroCnh(cnhLimpa);
     }
 }

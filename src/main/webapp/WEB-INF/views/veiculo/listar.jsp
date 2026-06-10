@@ -114,14 +114,8 @@
                                                         </form>
                                                     </c:if>
                                                     <c:if test="${veiculo.status.name() == 'DISPONIVEL'}">
-                                                        <form method="post"
-                                                            action="${pageContext.request.contextPath}/veiculos/manutencao"
-                                                            style="display:inline"
-                                                            onsubmit="return confirm('Deseja enviar este veículo para manutenção?')">
-                                                            <input type="hidden" name="id" value="${veiculo.id}" />
-                                                            <button type="submit"
-                                                                class="btn btn-warning btn-sm">Manutenção</button>
-                                                        </form>
+                                                        <a href="${pageContext.request.contextPath}/manutencoes/novo?idVeiculo=${veiculo.id}"
+                                                            class="btn btn-warning btn-sm">Manutenção</a>
                                                     </c:if>
                                                     <form method="post"
                                                         action="${pageContext.request.contextPath}/veiculos/excluir"
