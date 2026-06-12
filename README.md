@@ -96,13 +96,11 @@ db.driver=org.postgresql.Driver
 
 Esses scripts criam as tabelas e inserem dados iniciais de clientes, motoristas, veículos e fretes.
 
-## Usuários de teste
+## Usuário de teste
 
 Dados de login presentes no script de inserção:
 
 - `admin` / `admin`
-- `operador` / `op123`
-- `supervisor` / `sup123`
 
 ## Dados de teste úteis
 
