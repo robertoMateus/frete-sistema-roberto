@@ -83,4 +83,12 @@ public class ManutencaoVeiculo {
         return dataFim.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
+    public String getDataInicioISO() {
+        return dataInicio != null ? dataInicio.toString() : "";
+    }
+
+    public String getDataFimISO() {
+        return dataFim != null ? dataFim.toString() : "";
+    }
+
 }

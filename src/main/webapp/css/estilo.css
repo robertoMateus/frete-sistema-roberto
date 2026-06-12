@@ -356,6 +356,12 @@ tbody tr:hover {
     color: #856404;
 }
 
+.campo-dica {
+    font-size: 0.78rem;
+    color: #888;
+    margin-top: 2px;
+}
+
 .erro {
     background-color: #fdecea;
     color: #c0392b;

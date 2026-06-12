@@ -6,7 +6,7 @@
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Novo Frete — GW Gestão de Fretes</title>
+            <title>${not empty frete.id ? 'Editar Frete' : 'Novo Frete'} — GW Gestão de Fretes</title>
             <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css" />
         </head>
 
@@ -18,14 +18,19 @@
 
                 <div class="page-header">
                     <a href="${pageContext.request.contextPath}/fretes/listar" class="btn btn-secondary">← Voltar</a>
-                    <h2>Novo Frete</h2>
+                    <h2>${not empty frete.id ? 'Editar Frete' : 'Novo Frete'}</h2>
                 </div>
 
                 <c:if test="${not empty erro}">
                     <div class="erro">${erro}</div>
                 </c:if>
 
-                <form method="post" action="${pageContext.request.contextPath}/fretes/novo">
+                <form method="post"
+                    action="${pageContext.request.contextPath}/fretes/${not empty frete.id ? 'editar' : 'novo'}">
+
+                    <c:if test="${not empty frete.id}">
+                        <input type="hidden" name="id" value="${frete.id}" />
+                    </c:if>
 
                     <%-- PARTES ENVOLVIDAS --%>
                         <div class="card">
@@ -181,7 +186,9 @@
                                     <div class="form-acoes">
                                         <a href="${pageContext.request.contextPath}/fretes/listar"
                                             class="btn btn-secondary">Cancelar</a>
-                                        <button type="submit" class="btn btn-primary">Emitir Frete</button>
+                                        <button type="submit" class="btn btn-primary">
+                                            ${not empty frete.id ? 'Salvar Alterações' : 'Emitir Frete'}
+                                        </button>
                                     </div>
 
                 </form>

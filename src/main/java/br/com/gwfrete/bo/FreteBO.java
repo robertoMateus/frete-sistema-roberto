@@ -3,15 +3,18 @@ package br.com.gwfrete.bo;
 import br.com.gwfrete.dao.ClienteDAO;
 import br.com.gwfrete.dao.FreteDAO;
 import br.com.gwfrete.dao.MotoristaDAO;
+import br.com.gwfrete.dao.OcorrenciaFreteDAO;
 import br.com.gwfrete.dao.VeiculoDAO;
 import br.com.gwfrete.exception.CadastroException;
 import br.com.gwfrete.exception.FreteException;
 import br.com.gwfrete.model.Cliente;
 import br.com.gwfrete.model.Frete;
 import br.com.gwfrete.model.Motorista;
+import br.com.gwfrete.model.OcorrenciaFrete;
 import br.com.gwfrete.model.StatusFrete;
 import br.com.gwfrete.model.StatusMotorista;
 import br.com.gwfrete.model.StatusVeiculo;
+import br.com.gwfrete.model.TipoOcorrencia;
 import br.com.gwfrete.model.Veiculo;
 import br.com.gwfrete.util.ConexaoPool;
 import br.com.gwfrete.util.FreteUtil;
@@ -34,6 +37,7 @@ public class FreteBO {
     private final FreteDAO freteDAO = new FreteDAO();
     private final ClienteDAO clienteDAO = new ClienteDAO();
     private final MotoristaDAO motoristaDAO = new MotoristaDAO();
+    private final OcorrenciaFreteDAO ocorrenciaDAO = new OcorrenciaFreteDAO();
     private final VeiculoDAO veiculoDAO = new VeiculoDAO();
     private final PrecoRotaBO precoRotaBO = new PrecoRotaBO();
 
@@ -51,6 +55,7 @@ public class FreteBO {
 
             frete.setDataEmissao(LocalDateTime.now());
 
+            validarClientes(frete);
             validarMotorista(motorista, frete.getDataEmissao().toLocalDate(), conn);
             validarVeiculo(veiculo, frete.getPesoCarga());
             validarDatas(frete);
@@ -139,10 +144,20 @@ public class FreteBO {
         }
     }
 
-    public void registrarEntrega(Long idFrete, LocalDateTime dataEntrega) throws FreteException {
+    public void registrarEntrega(Long idFrete, LocalDateTime dataEntrega,
+                                   String nomeRecebedor, String documentoRecebedor) throws FreteException {
         if (dataEntrega == null) {
             throw new FreteException("A data/hora de entrega é obrigatória.");
         }
+        if (nomeRecebedor == null || nomeRecebedor.trim().isEmpty()) {
+            throw new FreteException("O nome do recebedor é obrigatório.");
+        }
+        if (documentoRecebedor == null || documentoRecebedor.trim().isEmpty()) {
+            throw new FreteException("O documento do recebedor é obrigatório.");
+        }
+
+        nomeRecebedor = nomeRecebedor.trim();
+        documentoRecebedor = documentoRecebedor.trim();
 
         try (Connection conn = ConexaoPool.getConexao()) {
             Frete frete = freteDAO.buscarPorId(idFrete, conn);
@@ -155,13 +170,42 @@ public class FreteBO {
                                 + "O frete deve estar com status EM TRÂNSITO.");
             }
 
+            if (dataEntrega.isAfter(LocalDateTime.now())) {
+                throw new FreteException("A data de entrega não pode ser futura.");
+            }
+
             if (dataEntrega.isBefore(frete.getDataSaida())) {
                 throw new FreteException(
                         "A data de entrega não pode ser anterior à data de saída do frete.");
             }
 
+            OcorrenciaFrete ultimaOcorrencia = ocorrenciaDAO.buscarUltimaPorFrete(idFrete, conn);
+            if (ultimaOcorrencia != null && dataEntrega.isBefore(ultimaOcorrencia.getDataHoraOcorrencia())) {
+                throw new FreteException(
+                        "A data de entrega não pode ser anterior à última ocorrência registrada.");
+            }
+
+            if (frete.getMunicipioDestino() == null || frete.getMunicipioDestino().trim().isEmpty()
+                    || frete.getUfDestino() == null || frete.getUfDestino().trim().isEmpty()) {
+                throw new FreteException("Não foi possível registrar a entrega: destino do frete está incompleto.");
+            }
+
             conn.setAutoCommit(false);
             try {
+                if (ocorrenciaDAO.jaPossuiEntregaRealizada(idFrete, conn)) {
+                    throw new FreteException("Este frete já possui uma entrega registrada.");
+                }
+
+                OcorrenciaFrete ocorrencia = new OcorrenciaFrete();
+                ocorrencia.setFrete(frete);
+                ocorrencia.setTipo(TipoOcorrencia.ENTREGA_REALIZADA);
+                ocorrencia.setDataHoraOcorrencia(dataEntrega);
+                ocorrencia.setMunicipio(frete.getMunicipioDestino());
+                ocorrencia.setUf(frete.getUfDestino());
+                ocorrencia.setNomeRecebedor(nomeRecebedor);
+                ocorrencia.setDocumentoRecebedor(documentoRecebedor);
+
+                ocorrenciaDAO.inserir(ocorrencia, conn);
                 freteDAO.atualizarDataEntrega(idFrete, dataEntrega, conn);
                 freteDAO.atualizarStatus(idFrete, StatusFrete.ENTREGUE, conn);
                 veiculoDAO.atualizarStatus(frete.getVeiculo().getId(), StatusVeiculo.DISPONIVEL, conn);
@@ -336,6 +380,50 @@ public class FreteBO {
         }
     }
 
+    public void atualizar(Frete frete) throws CadastroException, FreteException {
+        validarCamposObrigatorios(frete);
+
+        try (Connection conn = ConexaoPool.getConexao()) {
+            Frete existente = freteDAO.buscarPorId(frete.getId(), conn);
+            validarFreteEncontrado(existente, frete.getId());
+
+            if (existente.getStatus() != StatusFrete.EMITIDO) {
+                throw new FreteException(
+                        "Só é permitido editar fretes com status EMITIDO.");
+            }
+
+            Cliente remetente = clienteDAO.buscarPorId(frete.getRemetente().getId(), conn);
+            Cliente destinatario = clienteDAO.buscarPorId(frete.getDestinatario().getId(), conn);
+            Motorista motorista = motoristaDAO.buscarPorId(frete.getMotorista().getId(), conn);
+            Veiculo veiculo = veiculoDAO.buscarPorId(frete.getVeiculo().getId(), conn);
+
+            validarEntidadesExistem(remetente, destinatario, motorista, veiculo);
+
+            // Só revalida motorista se ele mudou
+            if (!motorista.getId().equals(existente.getMotorista().getId())) {
+                validarMotorista(motorista, existente.getDataEmissao().toLocalDate(), conn);
+            }
+
+            validarClientes(frete);
+            validarVeiculo(veiculo, frete.getPesoCarga());
+            validarDatas(frete);
+            validarUfs(frete);
+
+            frete.setNumeroFrete(existente.getNumeroFrete());
+            frete.setStatus(existente.getStatus());
+            frete.setDataEmissao(existente.getDataEmissao());
+
+            calcularValoresFinanceiros(frete);
+            freteDAO.atualizar(frete, conn);
+
+        } catch (CadastroException | FreteException e) {
+            throw e;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao atualizar frete.", e);
+            throw new FreteException("Erro inesperado ao atualizar frete.");
+        }
+    }
+
     // Validações privadas
     private void validarCamposObrigatorios(Frete frete) throws CadastroException {
         if (frete.getRemetente() == null || frete.getRemetente().getId() == null) {
@@ -376,6 +464,12 @@ public class FreteBO {
         }
         if (frete.getDataPrevisaoEntrega() == null) {
             throw new CadastroException("A data prevista de entrega é obrigatória.");
+        }
+    }
+
+    private void validarClientes(Frete frete) throws FreteException {
+        if(frete.getRemetente().getId().equals(frete.getDestinatario().getId())) {
+            throw new FreteException("O destinatário e remetente não podem ser iguais.");
         }
     }
 

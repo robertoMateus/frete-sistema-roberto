@@ -5,6 +5,7 @@ import br.com.gwfrete.bo.FreteBO;
 import br.com.gwfrete.bo.MotoristaBO;
 import br.com.gwfrete.bo.OcorrenciaFreteBO;
 import br.com.gwfrete.model.OcorrenciaFrete;
+import br.com.gwfrete.model.StatusFrete;
 import br.com.gwfrete.bo.VeiculoBO;
 import br.com.gwfrete.exception.NegocioException;
 import br.com.gwfrete.model.Cliente;
@@ -48,6 +49,8 @@ public class FreteController extends HttpServlet {
             abrirConfirmarSaida(req, resp);
         } else if (path.equals("/naoEntregue")) {
             abrirNaoEntregue(req, resp);
+        } else if (path.equals("/editar")) {
+            abrirFormEditar(req, resp);
         } else {
             resp.sendRedirect(req.getContextPath() + "/fretes/listar");
         }
@@ -81,6 +84,9 @@ public class FreteController extends HttpServlet {
                 break;
             case "/cancelar":
                 cancelar(req, resp);
+                break;
+            case "/editar":
+                atualizar(req, resp);
                 break;
             default:
                 resp.sendRedirect(req.getContextPath() + "/fretes/listar");
@@ -146,6 +152,11 @@ public class FreteController extends HttpServlet {
 
             req.setAttribute("frete", frete);
             try {
+                if (frete.getStatus() == StatusFrete.EMITIDO) {
+                    req.setAttribute("clientes", clienteBO.listar(null, 1, Integer.MAX_VALUE));
+                    req.setAttribute("motoristas", motoristaBO.listar(null, 1, Integer.MAX_VALUE));
+                    req.setAttribute("veiculos", veiculoBO.listar(null, 1, Integer.MAX_VALUE));
+                }
                 List<OcorrenciaFrete> ocorrencias = ocorrenciaBO.listarPorFrete(id);
                 req.setAttribute("ocorrencias", ocorrencias);
             } catch (Exception ex) {
@@ -268,7 +279,9 @@ public class FreteController extends HttpServlet {
             Long id = Long.parseLong(req.getParameter("id"));
             String dataEntregaParam = req.getParameter("dataEntrega");
             LocalDateTime dataEntrega = LocalDateTime.parse(dataEntregaParam);
-            freteBO.registrarEntrega(id, dataEntrega);
+            String nomeRecebedor = req.getParameter("nomeRecebedor");
+            String documentoRecebedor = req.getParameter("documentoRecebedor");
+            freteBO.registrarEntrega(id, dataEntrega, nomeRecebedor, documentoRecebedor);
             resp.sendRedirect(req.getContextPath() + "/fretes/detalhe?id=" + id + "&sucesso=entregue");
 
         } catch (NegocioException e) {
@@ -325,34 +338,94 @@ public class FreteController extends HttpServlet {
         }
     }
 
+    private void abrirFormEditar(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            Long id = Long.parseLong(req.getParameter("id"));
+            Frete frete = freteBO.buscarPorId(id);
+
+            req.setAttribute("frete", frete);
+            req.setAttribute("clientes", clienteBO.listar(null, 1, Integer.MAX_VALUE));
+            req.setAttribute("motoristas", motoristaBO.listar(null, 1, Integer.MAX_VALUE));
+            req.setAttribute("veiculos", veiculoBO.listar(null, 1, Integer.MAX_VALUE));
+            req.getRequestDispatcher("/WEB-INF/views/frete/form.jsp").forward(req, resp);
+
+        } catch (NegocioException e) {
+            req.setAttribute("erro", e.getMessage());
+            listar(req, resp);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro ao abrir edição de frete.", e);
+            resp.sendRedirect(req.getContextPath() + "/erro");
+        }
+    }
+
+    private void atualizar(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            Frete frete = extrairFrete(req);
+            frete.setId(Long.parseLong(req.getParameter("id")));
+            freteBO.atualizar(frete);
+            resp.sendRedirect(req.getContextPath() + "/fretes/detalhe?id=" + frete.getId() + "&sucesso=atualizado");
+
+        } catch (NegocioException e) {
+            req.setAttribute("erro", e.getMessage());
+            try {
+                req.setAttribute("clientes", clienteBO.listar(null, 1, Integer.MAX_VALUE));
+                req.setAttribute("motoristas", motoristaBO.listar(null, 1, Integer.MAX_VALUE));
+                req.setAttribute("veiculos", veiculoBO.listar(null, 1, Integer.MAX_VALUE));
+            } catch (NegocioException ex) {
+                LOGGER.log(Level.SEVERE, "Erro ao recarregar dados do formulário.", ex);
+            }
+            Frete freteComErro = extrairFreteSemValidacao(req);
+            freteComErro.setId(Long.parseLong(req.getParameter("id"))); // <-- correção
+            req.setAttribute("frete", freteComErro);
+            req.getRequestDispatcher("/WEB-INF/views/frete/form.jsp").forward(req, resp);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro inesperado ao atualizar frete.", e);
+            resp.sendRedirect(req.getContextPath() + "/erro");
+        }
+    }
+
     private Frete extrairFrete(HttpServletRequest req) {
         Frete frete = new Frete();
 
         String idRemetente = req.getParameter("idRemetente");
         if (idRemetente != null && !idRemetente.isEmpty()) {
             Cliente remetente = new Cliente();
-            try { remetente.setId(Long.parseLong(idRemetente)); } catch (NumberFormatException e) { /* mantém nulo */ }
+            try {
+                remetente.setId(Long.parseLong(idRemetente));
+            } catch (NumberFormatException e) {
+            }
             frete.setRemetente(remetente);
         }
 
         String idDestinatario = req.getParameter("idDestinatario");
         if (idDestinatario != null && !idDestinatario.isEmpty()) {
             Cliente destinatario = new Cliente();
-            try { destinatario.setId(Long.parseLong(idDestinatario)); } catch (NumberFormatException e) { /* mantém nulo */ }
+            try {
+                destinatario.setId(Long.parseLong(idDestinatario));
+            } catch (NumberFormatException e) {
+            }
             frete.setDestinatario(destinatario);
         }
 
         String idMotorista = req.getParameter("idMotorista");
         if (idMotorista != null && !idMotorista.isEmpty()) {
             Motorista motorista = new Motorista();
-            try { motorista.setId(Long.parseLong(idMotorista)); } catch (NumberFormatException e) { /* mantém nulo */ }
+            try {
+                motorista.setId(Long.parseLong(idMotorista));
+            } catch (NumberFormatException e) {
+            }
             frete.setMotorista(motorista);
         }
 
         String idVeiculo = req.getParameter("idVeiculo");
         if (idVeiculo != null && !idVeiculo.isEmpty()) {
             Veiculo veiculo = new Veiculo();
-            try { veiculo.setId(Long.parseLong(idVeiculo)); } catch (NumberFormatException e) { /* mantém nulo */ }
+            try {
+                veiculo.setId(Long.parseLong(idVeiculo));
+            } catch (NumberFormatException e) {
+            }
             frete.setVeiculo(veiculo);
         }
 
@@ -364,27 +437,42 @@ public class FreteController extends HttpServlet {
 
         String peso = req.getParameter("pesoCarga");
         if (peso != null && !peso.isEmpty()) {
-            try { frete.setPesoCarga(new BigDecimal(peso)); } catch (NumberFormatException e) { /* mantém nulo */ }
+            try {
+                frete.setPesoCarga(new BigDecimal(peso));
+            } catch (NumberFormatException e) {
+            }
         }
 
         String volumes = req.getParameter("volumeCarga");
         if (volumes != null && !volumes.isEmpty()) {
-            try { frete.setVolumeCarga(Integer.parseInt(volumes)); } catch (NumberFormatException e) { /* mantém nulo */ }
+            try {
+                frete.setVolumeCarga(Integer.parseInt(volumes));
+            } catch (NumberFormatException e) {
+            }
         }
 
         String valorFrete = req.getParameter("valorFrete");
         if (valorFrete != null && !valorFrete.isEmpty()) {
-            try { frete.setValorFrete(new BigDecimal(valorFrete)); } catch (NumberFormatException e) { /* mantém nulo */ }
+            try {
+                frete.setValorFrete(new BigDecimal(valorFrete));
+            } catch (NumberFormatException e) {
+            }
         }
 
         String aliquota = req.getParameter("aliquotaIcms");
         if (aliquota != null && !aliquota.isEmpty()) {
-            try { frete.setAliquotaIcms(new BigDecimal(aliquota)); } catch (NumberFormatException e) { /* mantém nulo */ }
+            try {
+                frete.setAliquotaIcms(new BigDecimal(aliquota));
+            } catch (NumberFormatException e) {
+            }
         }
 
         String dataPrevisao = req.getParameter("dataPrevisaoEntrega");
         if (dataPrevisao != null && !dataPrevisao.isEmpty()) {
-            try { frete.setDataPrevisaoEntrega(LocalDateTime.parse(dataPrevisao)); } catch (Exception e) { /* mantém nulo */ }
+            try {
+                frete.setDataPrevisaoEntrega(LocalDateTime.parse(dataPrevisao));
+            } catch (Exception e) {
+            }
         }
 
         return frete;

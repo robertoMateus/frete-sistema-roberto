@@ -227,4 +227,10 @@ public class Frete {
         return dataEntrega != null ? dataEntrega.format(FORMATTER) : "";
     }
 
+    public String getDataPrevisaoEntregaISO() {
+        if (dataPrevisaoEntrega == null)
+            return "";
+        return dataPrevisaoEntrega.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+    }
+
 }

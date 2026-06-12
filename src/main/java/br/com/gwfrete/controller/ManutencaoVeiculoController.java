@@ -36,6 +36,8 @@ public class ManutencaoVeiculoController extends HttpServlet {
             abrirFormNovo(req, resp);
         } else if (path.equals("/editar")) {
             editar(req, resp);
+        } else if (path.equals("/detalhe")) {
+            detalhe(req, resp);
         } else {
             resp.sendRedirect(req.getContextPath() + "/manutencoes/listar");
         }
@@ -61,6 +63,9 @@ public class ManutencaoVeiculoController extends HttpServlet {
             case "/concluir":
                 concluir(req, resp);
                 break;
+            case "/excluir":
+                excluir(req, resp);
+                break;
             default:
                 resp.sendRedirect(req.getContextPath() + "/manutencoes/listar");
         }
@@ -77,21 +82,23 @@ public class ManutencaoVeiculoController extends HttpServlet {
                     pagina = 1;
                 }
             }
+            String filtro = req.getParameter("filtro");
+            req.setAttribute("filtro", filtro);
             String idVeiculoParam = req.getParameter("idVeiculo");
             if (idVeiculoParam != null && !idVeiculoParam.isEmpty()) {
                 Long idVeiculo = Long.parseLong(idVeiculoParam);
                 Veiculo veiculo = veiculoBO.buscarPorId(idVeiculo);
-                List<ManutencaoVeiculo> manutencoes = manutencaoBO.listarPorVeiculo(idVeiculo, pagina,
+                List<ManutencaoVeiculo> manutencoes = manutencaoBO.listarPorVeiculo(idVeiculo, filtro, pagina,
                         ITENS_POR_PAGINA);
-                int total = manutencaoBO.contarPorVeiculo(idVeiculo);
+                int total = manutencaoBO.contarPorVeiculo(idVeiculo, filtro);
                 int totalPaginas = (int) Math.ceil((double) total / ITENS_POR_PAGINA);
                 req.setAttribute("veiculo", veiculo);
                 req.setAttribute("manutencoes", manutencoes);
                 req.setAttribute("total", total);
                 req.setAttribute("totalPaginas", totalPaginas);
             } else {
-                List<ManutencaoVeiculo> manutencoes = manutencaoBO.listarEmAberto(pagina, ITENS_POR_PAGINA);
-                int total = manutencaoBO.contarEmAberto();
+                List<ManutencaoVeiculo> manutencoes = manutencaoBO.listarTodas(filtro, pagina, ITENS_POR_PAGINA);
+                int total = manutencaoBO.contarTodas(filtro);
                 int totalPaginas = (int) Math.ceil((double) total / ITENS_POR_PAGINA);
                 req.setAttribute("manutencoes", manutencoes);
                 req.setAttribute("total", total);
@@ -137,8 +144,15 @@ public class ManutencaoVeiculoController extends HttpServlet {
             Long id = Long.parseLong(req.getParameter("id"));
             ManutencaoVeiculo manutencao = manutencaoBO.buscarPorId(id);
 
+            if (manutencao.getDataFim() != null) {
+                resp.sendRedirect(req.getContextPath() + "/manutencoes/detalhe?id=" + id);
+                return;
+            }
+
             req.setAttribute("manutencao", manutencao);
             req.setAttribute("tiposManutencao", TipoManutencao.values());
+            req.setAttribute("veiculos", veiculoBO.listar(null, 1, Integer.MAX_VALUE));
+
             req.getRequestDispatcher("/WEB-INF/views/manutencoes/form.jsp").forward(req, resp);
 
         } catch (NegocioException e) {
@@ -210,6 +224,38 @@ public class ManutencaoVeiculoController extends HttpServlet {
             listar(req, resp);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro inesperado ao concluir manutenção.", e);
+            resp.sendRedirect(req.getContextPath() + "/erro");
+        }
+    }
+
+    private void detalhe(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            Long id = Long.parseLong(req.getParameter("id"));
+            ManutencaoVeiculo manutencao = manutencaoBO.buscarPorId(id);
+            req.setAttribute("manutencao", manutencao);
+            req.getRequestDispatcher("/WEB-INF/views/manutencoes/detalhe.jsp").forward(req, resp);
+        } catch (NegocioException e) {
+            req.setAttribute("erro", e.getMessage());
+            listar(req, resp);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro ao abrir detalhe de manutenção.", e);
+            resp.sendRedirect(req.getContextPath() + "/erro");
+        }
+    }
+
+    private void excluir(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            Long id = Long.parseLong(req.getParameter("id"));
+            manutencaoBO.excluir(id);
+            resp.sendRedirect(req.getContextPath() + "/manutencoes/listar?sucesso=excluido");
+
+        } catch (NegocioException e) {
+            req.setAttribute("erro", e.getMessage());
+            listar(req, resp);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro inesperado ao excluir manutenção.", e);
             resp.sendRedirect(req.getContextPath() + "/erro");
         }
     }

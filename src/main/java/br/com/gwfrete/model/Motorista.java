@@ -16,6 +16,7 @@ public class Motorista {
 
     private TipoVinculoMotorista tipoVinculo;
     private StatusMotorista status;
+    private Veiculo veiculo;
 
     public Motorista() {
     }
@@ -100,6 +101,8 @@ public class Motorista {
         this.status = status;
     }
 
+    
+
     public String getCpfFormatado() {
         if (cpf == null || cpf.length() != 11)
             return cpf;
@@ -119,6 +122,14 @@ public class Motorista {
         if (dataValidadeCnh == null)
             return "";
         return dataValidadeCnh.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
+    public Veiculo getVeiculo() {
+        return veiculo;
+    }
+
+    public void setVeiculo(Veiculo veiculo) {
+        this.veiculo = veiculo;
     }
 
 }

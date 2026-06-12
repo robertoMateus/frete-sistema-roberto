@@ -18,7 +18,12 @@
 
                 <div class="page-header-lista">
                     <h2>Fretes</h2>
-                    <a href="${pageContext.request.contextPath}/fretes/novo" class="btn btn-primary">+ Novo Frete</a>
+                    <div style="display:flex; gap:10px;">
+                        <a href="${pageContext.request.contextPath}/relatorios/fretes-em-aberto" target="_blank"
+                            class="btn btn-secondary">Relatório de fretes em aberto</a>
+                        <a href="${pageContext.request.contextPath}/fretes/novo" class="btn btn-primary">+ Novo
+                            Frete</a>
+                    </div>
                 </div>
 
                 <c:if test="${not empty erro}">

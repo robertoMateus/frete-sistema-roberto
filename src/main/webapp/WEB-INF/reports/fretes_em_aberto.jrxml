@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+	name="fretes_em_aberto" language="groovy" pageWidth="842" pageHeight="595"
+	orientation="Landscape" columnWidth="782" leftMargin="30" rightMargin="30" topMargin="20"
+	bottomMargin="20" uuid="35b5d451-75a3-4697-ab8b-7766406ec525">
+	<property name="ireport.zoom" value="1.6105100000000012" />
+	<property name="ireport.x" value="65" />
+	<property name="ireport.y" value="0" />
+	<style name="styleTitulo" forecolor="#1A3A5C" fontName="DejaVu Sans" fontSize="14" isBold="true" />
+	<style name="styleSubtitulo" forecolor="#555555" fontName="DejaVu Sans" fontSize="9" />
+	<style name="styleCabecalhoColuna" mode="Opaque" forecolor="#FFFFFF" backcolor="#1A3A5C"
+		fontName="DejaVu Sans" fontSize="8" isBold="true" />
+	<style name="styleDetalheNormal" mode="Opaque" backcolor="#FFFFFF" fontName="DejaVu Sans"
+		fontSize="8" />
+	<style name="styleDetalheAlternado" mode="Opaque" backcolor="#EEF2F7" fontName="DejaVu Sans"
+		fontSize="8" />
+	<style name="styleAtrasado" forecolor="#CC0000" fontName="DejaVu Sans" fontSize="8"
+		isBold="true" />
+	<style name="styleRodape" forecolor="#555555" fontName="DejaVu Sans" fontSize="8" />
+	<parameter name="REPORT_TITLE" class="java.lang.String" isForPrompting="false" />
+	<parameter name="DATA_GERACAO" class="java.lang.String" isForPrompting="false" />
+	<queryString language="SQL">
+		<![CDATA[SELECT
+            f.numero,
+            rem.razao_social                                    AS remetente,
+            dest.razao_social                                   AS destinatario,
+            m.nome                                              AS motorista,
+            f.municipio_destino,
+            f.uf_destino,
+            f.data_previsao_entrega                             AS data_previsao,
+            f.status,
+            GREATEST(0, (CURRENT_DATE - f.data_previsao_entrega::date)::int) AS dias_atraso
+        FROM frete f
+        JOIN cliente  rem  ON rem.id  = f.id_remetente
+        JOIN cliente  dest ON dest.id = f.id_destinatario
+        JOIN motorista m   ON m.id    = f.id_motorista
+        WHERE f.status NOT IN ('ENTREGUE', 'NAO_ENTREGUE', 'CANCELADO')
+        ORDER BY f.data_previsao_entrega ASC, f.numero ASC]]>
+	</queryString>
+	<field name="numero" class="java.lang.String" />
+	<field name="remetente" class="java.lang.String" />
+	<field name="destinatario" class="java.lang.String" />
+	<field name="motorista" class="java.lang.String" />
+	<field name="municipio_destino" class="java.lang.String" />
+	<field name="uf_destino" class="java.lang.String" />
+	<field name="data_previsao" class="java.sql.Timestamp" />
+	<field name="status" class="java.lang.String" />
+	<field name="dias_atraso" class="java.lang.Integer" />
+	<variable name="TOTAL_FRETES" class="java.lang.Integer" calculation="Count">
+		<variableExpression><![CDATA[$F{numero}]]></variableExpression>
+	</variable>
+	<variable name="TOTAL_ATRASADOS" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{dias_atraso} != null && $F{dias_atraso} > 0 ? 1 : 0]]></variableExpression>
+	</variable>
+	<title>
+		<band height="60" splitType="Stretch">
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="0" width="782" height="4" forecolor="#1A3A5C"
+					backcolor="#1A3A5C" uuid="7c5398e3-6c0d-4179-8103-d9457b5f5464" />
+			</rectangle>
+			<textField>
+				<reportElement style="styleTitulo" x="0" y="10" width="500" height="22"
+					uuid="c5c395cc-4ac5-46a2-b5a0-87fe233a4179" />
+				<textFieldExpression><![CDATA[$P{REPORT_TITLE} != null ? $P{REPORT_TITLE} : "Fretes em Aberto"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="styleSubtitulo" x="0" y="34" width="300" height="14"
+					uuid="909bd4b6-8a08-4459-9f80-3b35071def9f" />
+				<textFieldExpression><![CDATA["Gerado em: " + ($P{DATA_GERACAO} != null ? $P{DATA_GERACAO} : new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date()))]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="56" width="782" height="1" forecolor="#CCCCCC"
+					uuid="577f90c7-618f-45c1-a6c9-23df1bead929" />
+			</line>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement style="styleCabecalhoColuna" x="0" y="0" width="90" height="22"
+					uuid="9e72298b-0c85-499a-bad9-1855b297adc2" />
+				<box leftPadding="4">
+					<pen lineWidth="0.5" lineColor="#FFFFFF" />
+				</box>
+				<text><![CDATA[Nº Frete]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="styleCabecalhoColuna" x="90" y="0" width="130" height="22"
+					uuid="80802402-6513-4238-a1b6-1f6f3ad7b8a9" />
+				<box leftPadding="4">
+					<pen lineWidth="0.5" lineColor="#FFFFFF" />
+				</box>
+				<text><![CDATA[Remetente]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="styleCabecalhoColuna" x="220" y="0" width="130" height="22"
+					uuid="d9c48d1c-7972-4557-8a4f-e41e6782365e" />
+				<box leftPadding="4">
+					<pen lineWidth="0.5" lineColor="#FFFFFF" />
+				</box>
+				<text><![CDATA[Destinatário]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="styleCabecalhoColuna" x="350" y="0" width="120" height="22"
+					uuid="5415e78e-369c-4c79-912a-51c6ef8ac417" />
+				<box leftPadding="4">
+					<pen lineWidth="0.5" lineColor="#FFFFFF" />
+				</box>
+				<text><![CDATA[Motorista]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="styleCabecalhoColuna" x="470" y="0" width="120" height="22"
+					uuid="ab533651-feec-45a9-9d48-5bab633b9fbf" />
+				<box leftPadding="4">
+					<pen lineWidth="0.5" lineColor="#FFFFFF" />
+				</box>
+				<text><![CDATA[Destino]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="styleCabecalhoColuna" x="590" y="0" width="80" height="22"
+					uuid="9ca7b215-5e3e-4e44-a8db-b8ebf6a74ff4" />
+				<box leftPadding="4">
+					<pen lineWidth="0.5" lineColor="#FFFFFF" />
+				</box>
+				<text><![CDATA[Prev. Entrega]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="styleCabecalhoColuna" x="670" y="0" width="50" height="22"
+					uuid="1f27fe0f-4f23-4acd-ba2d-773b1fe555c2" />
+				<box leftPadding="4">
+					<pen lineWidth="0.5" lineColor="#FFFFFF" />
+				</box>
+				<text><![CDATA[Dias Atraso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="styleCabecalhoColuna" x="720" y="0" width="62" height="22"
+					uuid="260eb916-8935-4b04-bf33-ae66d8afca7d" />
+				<box leftPadding="4">
+					<pen lineWidth="0.5" lineColor="#FFFFFF" />
+				</box>
+				<text><![CDATA[Status]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+
+			<textField>
+				<reportElement style="styleDetalheNormal" mode="Opaque" x="0" y="0" width="90"
+					height="18" backcolor="#FFFFFF" uuid="c0ce488e-beee-4435-8e39-b317cda4258a">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="styleDetalheAlternado" x="0" y="0" width="90" height="18"
+					uuid="bd553991-3fd2-4ae4-afb2-fce1e84e1aea">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+			</textField>
+
+			<textField isStretchWithOverflow="true">
+				<reportElement style="styleDetalheNormal" mode="Opaque" x="90" y="0" width="130"
+					height="18" backcolor="#FFFFFF" uuid="00b303fc-552c-4978-b0b1-d1854bd6e878">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{remetente}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="styleDetalheAlternado" x="90" y="0" width="130" height="18"
+					uuid="39d1a539-ae95-4acb-89a3-65715d35b4ef">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{remetente}]]></textFieldExpression>
+			</textField>
+
+			<textField isStretchWithOverflow="true">
+				<reportElement style="styleDetalheNormal" mode="Opaque" x="220" y="0" width="130"
+					height="18" backcolor="#FFFFFF" uuid="8f532958-857d-440e-b498-c37bd9c0bd8e">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{destinatario}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="styleDetalheAlternado" x="220" y="0" width="130" height="18"
+					uuid="517a14cc-b7da-4fb1-a6e9-b5c8a0fe6723">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{destinatario}]]></textFieldExpression>
+			</textField>
+
+			<textField>
+				<reportElement style="styleDetalheNormal" mode="Opaque" x="350" y="0" width="120"
+					height="18" backcolor="#FFFFFF" uuid="f06bbe16-7d05-4944-aed9-a7d607e6834b">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{motorista}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="styleDetalheAlternado" x="350" y="0" width="120" height="18"
+					uuid="f84273ce-ab63-40fb-9b62-5ff54d9d7262">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{motorista}]]></textFieldExpression>
+			</textField>
+
+			<textField>
+				<reportElement style="styleDetalheNormal" mode="Opaque" x="470" y="0" width="120"
+					height="18" backcolor="#FFFFFF" uuid="e689a77a-e13f-49cc-9ed8-4d5d8be2fe3d">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{municipio_destino} + " - " + $F{uf_destino}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="styleDetalheAlternado" x="470" y="0" width="120" height="18"
+					uuid="424300b8-dd01-4618-8c8a-6391e3691fe5">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{municipio_destino} + " - " + $F{uf_destino}]]></textFieldExpression>
+			</textField>
+
+			<textField pattern="dd/MM/yyyy">
+				<reportElement style="styleDetalheNormal" mode="Opaque" x="590" y="0" width="80"
+					height="18" backcolor="#FFFFFF" uuid="ccae59ce-967c-45d0-aa6c-291c4433e06c">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{data_previsao}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement style="styleDetalheAlternado" x="590" y="0" width="80" height="18"
+					uuid="0a49eda0-44ee-443c-92f2-da6830afa1cf">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{data_previsao}]]></textFieldExpression>
+			</textField>
+
+			<textField>
+				<reportElement style="styleAtrasado" mode="Opaque" x="670" y="0" width="50"
+					height="18" backcolor="#FFE5E5" uuid="029544de-3f7f-4615-975a-3c11d0ca9c03">
+					<printWhenExpression><![CDATA[$F{dias_atraso} != null && $F{dias_atraso} > 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[$F{dias_atraso} + " dias"]]></textFieldExpression>
+			</textField>
+
+			<textField>
+				<reportElement style="styleDetalheNormal" mode="Opaque" x="670" y="0" width="50"
+					height="18" backcolor="#FFFFFF" uuid="83ffc19d-1337-417d-9d40-105ae7d16c58">
+					<printWhenExpression><![CDATA[$F{dias_atraso} == null || $F{dias_atraso} <= 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA["No prazo"]]></textFieldExpression>
+			</textField>
+
+			<textField>
+				<reportElement style="styleDetalheNormal" mode="Opaque" x="720" y="0" width="62"
+					height="18" backcolor="#FFFFFF" uuid="8eb3e169-ee2f-47ce-9895-d039cfd1fed5">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[
+					(["EMITIDO":           "Emitido",
+					  "EM_TRANSITO":       "Em Trânsito",
+					  "SAIDA_CONFIRMADA":  "Saída Confirm.",
+					  "ENTREGUE":          "Entregue",
+					  "NAO_ENTREGUE":      "Não Entregue",
+					  "CANCELADO":         "Cancelado"
+					][$F{status}] ?: $F{status}.replace("_", " "))
+				]]></textFieldExpression>
+			</textField>
+
+			<textField>
+				<reportElement style="styleDetalheAlternado" x="720" y="0" width="62" height="18"
+					uuid="184639f9-b22e-483e-81fc-5032271bf4ea">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="4" />
+				<textFieldExpression><![CDATA[
+					(["EMITIDO":           "Emitido",
+					  "EM_TRANSITO":       "Em Trânsito",
+					  "SAIDA_CONFIRMADA":  "Saída Confirm.",
+					  "ENTREGUE":          "Entregue",
+					  "NAO_ENTREGUE":      "Não Entregue",
+					  "CANCELADO":         "Cancelado"
+					][$F{status}] ?: $F{status}.replace("_", " "))
+				]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="18">
+			<line>
+				<reportElement x="0" y="0" width="782" height="1" forecolor="#CCCCCC"
+					uuid="767674fd-1260-47fd-84d5-29f95656acfb" />
+			</line>
+			<textField>
+				<reportElement style="styleRodape" x="0" y="4" width="400" height="12"
+					uuid="782e0d07-0731-491d-8f20-7f71d5e300d5" />
+				<textFieldExpression><![CDATA["Sistema GW Gestão de Fretes"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="styleRodape" x="600" y="4" width="182" height="12"
+					uuid="7f3a817f-25f9-43a4-bd79-a07cf05e7342">
+					<property name="net.sf.jasperreports.print.keep.full.text" value="true" />
+				</reportElement>
+				<textElement textAlignment="Right" />
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="40" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="4" width="782" height="1" forecolor="#1A3A5C"
+					uuid="91050316-b84d-4741-93f7-ed5c99718a60" />
+			</line>
+			<staticText>
+				<reportElement style="styleRodape" x="0" y="10" width="120" height="14"
+					uuid="a5a81a13-d1b5-41a7-99cb-1370e7594991" />
+				<textElement>
+					<font isBold="true" />
+				</textElement>
+				<text><![CDATA[Total de fretes:]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="styleRodape" x="120" y="10" width="60" height="14"
+					uuid="5bb2ff0a-1a3a-4cc3-9f46-0110ddd8bcad" />
+				<textElement>
+					<font isBold="true" />
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTAL_FRETES}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="styleRodape" x="200" y="10" width="140" height="14"
+					forecolor="#CC0000" uuid="aff7dec5-bd96-4409-aac7-5ce1c9891b03" />
+				<textElement>
+					<font isBold="true" />
+				</textElement>
+				<text><![CDATA[Fretes com atraso:]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="styleRodape" x="340" y="10" width="60" height="14"
+					forecolor="#CC0000" uuid="678f4a00-e6a8-4787-966b-5249728782d8" />
+				<textElement>
+					<font isBold="true" />
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTAL_ATRASADOS}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

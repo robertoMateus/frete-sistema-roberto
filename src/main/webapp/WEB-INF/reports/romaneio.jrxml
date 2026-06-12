@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="romaneio" language="groovy"
+              pageWidth="842" pageHeight="595" orientation="Landscape"
+              columnWidth="782" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20"
+              uuid="a1b2c3d4-e5f6-7890-abcd-ef1234567890">
+
+    <style name="styleTitulo"          forecolor="#1A3A5C" fontName="DejaVu Sans" fontSize="14" isBold="true"/>
+    <style name="styleSubtitulo"       forecolor="#555555" fontName="DejaVu Sans" fontSize="9"/>
+    <style name="styleCabecalhoColuna" mode="Opaque" forecolor="#FFFFFF" backcolor="#1A3A5C"
+           fontName="DejaVu Sans" fontSize="8" isBold="true"/>
+    <style name="styleDetalheNormal"   mode="Opaque" backcolor="#FFFFFF"  fontName="DejaVu Sans" fontSize="8"/>
+    <style name="styleDetalheAlternado" mode="Opaque" backcolor="#EEF2F7" fontName="DejaVu Sans" fontSize="8"/>
+    <style name="styleRodape"          forecolor="#555555" fontName="DejaVu Sans" fontSize="8"/>
+    <style name="styleTotalLabel"      forecolor="#1A3A5C" fontName="DejaVu Sans" fontSize="8" isBold="true"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         PARÂMETROS
+         ═══════════════════════════════════════════════════════ -->
+    <parameter name="ID_MOTORISTA"    class="java.lang.Long"   isForPrompting="false"/>
+    <parameter name="DATA_ROMANEIO"   class="java.sql.Date"    isForPrompting="false"/>
+    <parameter name="DATA_GERACAO"    class="java.lang.String" isForPrompting="false"/>
+
+    <parameter name="NOME_MOTORISTA"  class="java.lang.String" isForPrompting="false"/>
+    <parameter name="CPF_MOTORISTA"   class="java.lang.String" isForPrompting="false"/>
+    <parameter name="CNH_MOTORISTA"   class="java.lang.String" isForPrompting="false"/>
+    <parameter name="PLACA_VEICULO"   class="java.lang.String" isForPrompting="false"/>
+    <parameter name="TIPO_VEICULO"    class="java.lang.String" isForPrompting="false"/>
+
+    <queryString language="SQL">
+        <![CDATA[
+        SELECT
+            f.numero,
+            rem.razao_social                            AS remetente,
+            dest.razao_social                           AS destinatario,
+            f.municipio_origem  || ' - ' || f.uf_origem AS origem,
+            f.municipio_destino || ' - ' || f.uf_destino AS destino,
+            f.descricao_carga,
+            f.peso_kg,
+            f.volumes,
+            f.valor_total,
+            f.status,
+            f.data_previsao_entrega
+        FROM frete f
+        JOIN cliente rem  ON rem.id  = f.id_remetente
+        JOIN cliente dest ON dest.id = f.id_destinatario
+        WHERE f.id_motorista = $P{ID_MOTORISTA}
+          AND f.status NOT IN ('CANCELADO')
+          AND DATE(f.data_emissao) = $P{DATA_ROMANEIO}
+        ORDER BY f.numero ASC
+        ]]>
+    </queryString>
+
+    <field name="numero"               class="java.lang.String"/>
+    <field name="remetente"            class="java.lang.String"/>
+    <field name="destinatario"         class="java.lang.String"/>
+    <field name="origem"               class="java.lang.String"/>
+    <field name="destino"              class="java.lang.String"/>
+    <field name="descricao_carga"      class="java.lang.String"/>
+    <field name="peso_kg"              class="java.math.BigDecimal"/>
+    <field name="volumes"              class="java.lang.Integer"/>
+    <field name="valor_total"          class="java.math.BigDecimal"/>
+    <field name="status"               class="java.lang.String"/>
+    <field name="data_previsao_entrega" class="java.sql.Timestamp"/>
+
+    <variable name="TOTAL_FRETES"      class="java.lang.Integer"        calculation="Count">
+        <variableExpression><![CDATA[$F{numero}]]></variableExpression>
+    </variable>
+    <variable name="TOTAL_PESO"        class="java.math.BigDecimal"     calculation="Sum">
+        <variableExpression><![CDATA[$F{peso_kg}]]></variableExpression>
+    </variable>
+    <variable name="TOTAL_VOLUMES"     class="java.lang.Integer"        calculation="Sum">
+        <variableExpression><![CDATA[$F{volumes}]]></variableExpression>
+    </variable>
+    <variable name="TOTAL_VALOR"       class="java.math.BigDecimal"     calculation="Sum">
+        <variableExpression><![CDATA[$F{valor_total}]]></variableExpression>
+    </variable>
+
+    <title>
+        <band height="90" splitType="Stretch">
+
+            <rectangle>
+                <reportElement mode="Opaque" x="0" y="0" width="782" height="4"
+                               forecolor="#1A3A5C" backcolor="#1A3A5C" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e701"/>
+            </rectangle>
+
+            <staticText>
+                <reportElement style="styleTitulo" x="0" y="10" width="500" height="22" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e702"/>
+                <text><![CDATA[Romaneio de Carga]]></text>
+            </staticText>
+
+            <textField>
+                <reportElement style="styleSubtitulo" x="0" y="34" width="400" height="14" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e703"/>
+                <textFieldExpression><![CDATA["Gerado em: " + ($P{DATA_GERACAO} != null ? $P{DATA_GERACAO} : new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date()))
+                    + "   |   Data do romaneio: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{DATA_ROMANEIO})]]>
+                </textFieldExpression>
+            </textField>
+
+            <line>
+                <reportElement x="0" y="52" width="782" height="1" forecolor="#CCCCCC" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e704"/>
+            </line>
+
+            <staticText>
+                <reportElement style="styleSubtitulo" x="0" y="58" width="80" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e705"/>
+                <textElement><font isBold="true"/></textElement>
+                <text><![CDATA[Motorista:]]></text>
+            </staticText>
+            <textField>
+                <reportElement style="styleSubtitulo" x="80" y="58" width="220" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e706"/>
+                <textFieldExpression><![CDATA[$P{NOME_MOTORISTA} != null ? $P{NOME_MOTORISTA} : "-"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement style="styleSubtitulo" x="0" y="72" width="80" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e707"/>
+                <textElement><font isBold="true"/></textElement>
+                <text><![CDATA[CPF:]]></text>
+            </staticText>
+            <textField>
+                <reportElement style="styleSubtitulo" x="80" y="72" width="140" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e708"/>
+                <textFieldExpression><![CDATA[$P{CPF_MOTORISTA} != null ? $P{CPF_MOTORISTA} : "-"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement style="styleSubtitulo" x="230" y="72" width="50" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e709"/>
+                <textElement><font isBold="true"/></textElement>
+                <text><![CDATA[CNH:]]></text>
+            </staticText>
+            <textField>
+                <reportElement style="styleSubtitulo" x="280" y="72" width="140" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e710"/>
+                <textFieldExpression><![CDATA[$P{CNH_MOTORISTA} != null ? $P{CNH_MOTORISTA} : "-"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement style="styleSubtitulo" x="500" y="58" width="60" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e711"/>
+                <textElement><font isBold="true"/></textElement>
+                <text><![CDATA[Veículo:]]></text>
+            </staticText>
+            <textField>
+                <reportElement style="styleSubtitulo" x="560" y="58" width="222" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e712"/>
+                <textFieldExpression><![CDATA[$P{TIPO_VEICULO} != null ? $P{TIPO_VEICULO} : "-"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement style="styleSubtitulo" x="500" y="72" width="60" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e713"/>
+                <textElement><font isBold="true"/></textElement>
+                <text><![CDATA[Placa:]]></text>
+            </staticText>
+            <textField>
+                <reportElement style="styleSubtitulo" x="560" y="72" width="100" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e714"/>
+                <textFieldExpression><![CDATA[$P{PLACA_VEICULO} != null ? $P{PLACA_VEICULO} : "-"]]></textFieldExpression>
+            </textField>
+
+        </band>
+    </title>
+
+    <pageHeader>
+        <band height="22" splitType="Stretch">
+
+            <staticText>
+                <reportElement style="styleCabecalhoColuna" x="0"   y="0" width="80"  height="22" uuid="c1a2b3c4-d5e6-4f70-8192-b3b4c5d6e701"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+                <text><![CDATA[Nº Frete]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="styleCabecalhoColuna" x="80"  y="0" width="130" height="22" uuid="c1a2b3c4-d5e6-4f70-8192-b3b4c5d6e702"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+                <text><![CDATA[Remetente]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="styleCabecalhoColuna" x="210" y="0" width="130" height="22" uuid="c1a2b3c4-d5e6-4f70-8192-b3b4c5d6e703"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+                <text><![CDATA[Destinatário]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="styleCabecalhoColuna" x="340" y="0" width="110" height="22" uuid="c1a2b3c4-d5e6-4f70-8192-b3b4c5d6e704"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+                <text><![CDATA[Destino]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="styleCabecalhoColuna" x="450" y="0" width="140" height="22" uuid="c1a2b3c4-d5e6-4f70-8192-b3b4c5d6e705"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+                <text><![CDATA[Descrição da Carga]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="styleCabecalhoColuna" x="590" y="0" width="65"  height="22" uuid="c1a2b3c4-d5e6-4f70-8192-b3b4c5d6e706"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+                <text><![CDATA[Peso (kg)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="styleCabecalhoColuna" x="655" y="0" width="50"  height="22" uuid="c1a2b3c4-d5e6-4f70-8192-b3b4c5d6e707"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+                <text><![CDATA[Volumes]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="styleCabecalhoColuna" x="705" y="0" width="77"  height="22" uuid="c1a2b3c4-d5e6-4f70-8192-b3b4c5d6e708"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+                <text><![CDATA[Valor Total]]></text>
+            </staticText>
+
+        </band>
+    </pageHeader>
+
+    <detail>
+        <band height="18" splitType="Stretch">
+
+            <textField>
+                <reportElement style="styleDetalheNormal" mode="Opaque" x="0" y="0" width="80" height="18"
+                               backcolor="#FFFFFF" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e701">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="styleDetalheAlternado" x="0" y="0" width="80" height="18" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e702">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement style="styleDetalheNormal" mode="Opaque" x="80" y="0" width="130" height="18"
+                               backcolor="#FFFFFF" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e703">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{remetente}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement style="styleDetalheAlternado" x="80" y="0" width="130" height="18" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e704">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{remetente}]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement style="styleDetalheNormal" mode="Opaque" x="210" y="0" width="130" height="18"
+                               backcolor="#FFFFFF" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e705">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{destinatario}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement style="styleDetalheAlternado" x="210" y="0" width="130" height="18" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e706">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{destinatario}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement style="styleDetalheNormal" mode="Opaque" x="340" y="0" width="110" height="18"
+                               backcolor="#FFFFFF" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e707">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{destino}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="styleDetalheAlternado" x="340" y="0" width="110" height="18" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e708">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{destino}]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement style="styleDetalheNormal" mode="Opaque" x="450" y="0" width="140" height="18"
+                               backcolor="#FFFFFF" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e709">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{descricao_carga}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement style="styleDetalheAlternado" x="450" y="0" width="140" height="18" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e710">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{descricao_carga}]]></textFieldExpression>
+            </textField>
+
+            <textField pattern="#,##0.00">
+                <reportElement style="styleDetalheNormal" mode="Opaque" x="590" y="0" width="65" height="18"
+                               backcolor="#FFFFFF" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e711">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{peso_kg}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0.00">
+                <reportElement style="styleDetalheAlternado" x="590" y="0" width="65" height="18" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e712">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{peso_kg}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement style="styleDetalheNormal" mode="Opaque" x="655" y="0" width="50" height="18"
+                               backcolor="#FFFFFF" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e713">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{volumes}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="styleDetalheAlternado" x="655" y="0" width="50" height="18" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e714">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{volumes}]]></textFieldExpression>
+            </textField>
+
+            <textField pattern="R$ #,##0.00">
+                <reportElement style="styleDetalheNormal" mode="Opaque" x="705" y="0" width="77" height="18"
+                               backcolor="#FFFFFF" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e715">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{valor_total}]]></textFieldExpression>
+            </textField>
+            <textField pattern="R$ #,##0.00">
+                <reportElement style="styleDetalheAlternado" x="705" y="0" width="77" height="18" uuid="c1a2b3c4-d5e6-4f70-8192-d3b4c5d6e716">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 != 0]]></printWhenExpression>
+                </reportElement>
+                <box leftPadding="4"/>
+                <textFieldExpression><![CDATA[$F{valor_total}]]></textFieldExpression>
+            </textField>
+
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="18">
+            <line>
+                <reportElement x="0" y="0" width="782" height="1" forecolor="#CCCCCC" uuid="c1a2b3c4-d5e6-4f70-8192-e3b4c5d6e701"/>
+            </line>
+            <textField>
+                <reportElement style="styleRodape" x="0" y="4" width="400" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-e3b4c5d6e702"/>
+                <textFieldExpression><![CDATA["Sistema GW Gestão de Fretes"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="styleRodape" x="600" y="4" width="182" height="12" uuid="c1a2b3c4-d5e6-4f70-8192-e3b4c5d6e703">
+                    <property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
+                </reportElement>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="50" splitType="Stretch">
+
+            <line>
+                <reportElement x="0" y="4" width="782" height="1" forecolor="#1A3A5C" uuid="c1a2b3c4-d5e6-4f70-8192-f3b4c5d6e701"/>
+            </line>
+
+            <staticText>
+                <reportElement style="styleTotalLabel" x="0" y="12" width="120" height="14" uuid="c1a2b3c4-d5e6-4f70-8192-f3b4c5d6e702"/>
+                <text><![CDATA[Total de fretes:]]></text>
+            </staticText>
+            <textField>
+                <reportElement style="styleTotalLabel" x="120" y="12" width="60" height="14" uuid="c1a2b3c4-d5e6-4f70-8192-f3b4c5d6e703"/>
+                <textFieldExpression><![CDATA[$V{TOTAL_FRETES}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement style="styleTotalLabel" x="200" y="12" width="100" height="14" uuid="c1a2b3c4-d5e6-4f70-8192-f3b4c5d6e704"/>
+                <text><![CDATA[Peso total (kg):]]></text>
+            </staticText>
+            <textField pattern="#,##0.00">
+                <reportElement style="styleTotalLabel" x="300" y="12" width="90" height="14" uuid="c1a2b3c4-d5e6-4f70-8192-f3b4c5d6e705"/>
+                <textFieldExpression><![CDATA[$V{TOTAL_PESO}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement style="styleTotalLabel" x="410" y="12" width="100" height="14" uuid="c1a2b3c4-d5e6-4f70-8192-f3b4c5d6e706"/>
+                <text><![CDATA[Total de volumes:]]></text>
+            </staticText>
+            <textField>
+                <reportElement style="styleTotalLabel" x="510" y="12" width="60" height="14" uuid="c1a2b3c4-d5e6-4f70-8192-f3b4c5d6e707"/>
+                <textFieldExpression><![CDATA[$V{TOTAL_VOLUMES}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement style="styleTotalLabel" x="590" y="12" width="100" height="14" uuid="c1a2b3c4-d5e6-4f70-8192-f3b4c5d6e708"/>
+                <text><![CDATA[Valor total:]]></text>
+            </staticText>
+            <textField pattern="R$ #,##0.00">
+                <reportElement style="styleTotalLabel" x="690" y="12" width="92" height="14" uuid="c1a2b3c4-d5e6-4f70-8192-f3b4c5d6e709"/>
+                <textFieldExpression><![CDATA[$V{TOTAL_VALOR}]]></textFieldExpression>
+            </textField>
+
+        </band>
+    </summary>
+
+</jasperReport>

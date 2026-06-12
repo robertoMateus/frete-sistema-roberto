@@ -276,6 +276,36 @@ public class FreteDAO {
         return 0;
     }
 
+    public void atualizar(Frete frete, Connection conn) throws SQLException {
+        String sql = "UPDATE frete SET " +
+                "id_remetente = ?, id_destinatario = ?, id_motorista = ?, id_veiculo = ?, " +
+                "municipio_origem = ?, uf_origem = ?, municipio_destino = ?, uf_destino = ?, " +
+                "descricao_carga = ?, peso_kg = ?, volumes = ?, valor_frete = ?, " +
+                "aliquota_icms = ?, valor_icms = ?, valor_total = ?, data_previsao_entrega = ? " +
+                "WHERE id = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, frete.getRemetente().getId());
+            stmt.setLong(2, frete.getDestinatario().getId());
+            stmt.setLong(3, frete.getMotorista().getId());
+            stmt.setLong(4, frete.getVeiculo().getId());
+            stmt.setString(5, frete.getMunicipioOrigem());
+            stmt.setString(6, frete.getUfOrigem());
+            stmt.setString(7, frete.getMunicipioDestino());
+            stmt.setString(8, frete.getUfDestino());
+            stmt.setString(9, frete.getDescricaoCarga());
+            stmt.setBigDecimal(10, frete.getPesoCarga());
+            stmt.setInt(11, frete.getVolumeCarga());
+            stmt.setBigDecimal(12, frete.getValorFrete());
+            stmt.setBigDecimal(13, frete.getAliquotaIcms());
+            stmt.setBigDecimal(14, frete.getValorIcms());
+            stmt.setBigDecimal(15, frete.getValorTotal());
+            stmt.setTimestamp(16, Timestamp.valueOf(frete.getDataPrevisaoEntrega()));
+            stmt.setLong(17, frete.getId());
+            stmt.executeUpdate();
+        }
+    }
+
     private Frete mapear(ResultSet rs, Connection conn) throws SQLException {
         Frete frete = new Frete();
         frete.setId(rs.getLong("id"));

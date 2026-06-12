@@ -2,6 +2,7 @@ package br.com.gwfrete.dao;
 
 import br.com.gwfrete.model.ManutencaoVeiculo;
 import br.com.gwfrete.model.TipoManutencao;
+import br.com.gwfrete.model.TipoVeiculo;
 import br.com.gwfrete.model.Veiculo;
 
 import java.sql.Connection;
@@ -15,11 +16,9 @@ import java.util.List;
 
 public class ManutencaoVeiculoDAO {
 
-    private static final String COLUNAS = "m.id, m.id_veiculo, m.tipo, m.descricao, m.data_inicio, m.data_fim, m.custo, v.placa";
+    private static final String COLUNAS = "m.id, m.id_veiculo, m.tipo, m.descricao, m.data_inicio, m.data_fim, m.custo, v.id as veiculo_id, v.placa, v.tipo as tipo_veiculo";
 
     private static final String FROM_JOIN = "FROM manutencao_veiculo m JOIN veiculo v ON v.id = m.id_veiculo ";
-
-    private static final int ITENS_POR_PAGINA = 10;
 
     public void inserir(ManutencaoVeiculo manutencao, Connection conn) throws SQLException {
         String sql = "INSERT INTO manutencao_veiculo " +
@@ -88,16 +87,35 @@ public class ManutencaoVeiculoDAO {
 
     public List<ManutencaoVeiculo> listarPorVeiculo(Long idVeiculo, int pagina, int itensPorPagina, Connection conn)
             throws SQLException {
+        return listarPorVeiculo(idVeiculo, null, pagina, itensPorPagina, conn);
+    }
+
+    public List<ManutencaoVeiculo> listarPorVeiculo(Long idVeiculo, String filtro, int pagina, int itensPorPagina,
+            Connection conn)
+            throws SQLException {
         List<ManutencaoVeiculo> manutencoes = new ArrayList<>();
         int offset = (pagina - 1) * itensPorPagina;
-        String sql = "SELECT " + COLUNAS + " " + FROM_JOIN +
-                "WHERE m.id_veiculo = ? " +
-                "ORDER BY m.data_inicio DESC " +
-                "LIMIT ? OFFSET ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, idVeiculo);
-            stmt.setInt(2, itensPorPagina);
-            stmt.setInt(3, offset);
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ").append(COLUNAS).append(" ").append(FROM_JOIN)
+                .append("WHERE m.id_veiculo = ? ");
+
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            sql.append(
+                    "AND (UPPER(v.placa) LIKE UPPER(?) OR UPPER(m.descricao) LIKE UPPER(?) OR UPPER(m.tipo) LIKE UPPER(?)) ");
+        }
+
+        sql.append("ORDER BY m.data_inicio DESC LIMIT ? OFFSET ?");
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            int idx = 1;
+            stmt.setLong(idx++, idVeiculo);
+            if (filtro != null && !filtro.trim().isEmpty()) {
+                String like = "%" + filtro.trim() + "%";
+                stmt.setString(idx++, like);
+                stmt.setString(idx++, like);
+                stmt.setString(idx++, like);
+            }
+            stmt.setInt(idx++, itensPorPagina);
+            stmt.setInt(idx, offset);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next())
                     manutencoes.add(mapear(rs));
@@ -107,15 +125,33 @@ public class ManutencaoVeiculoDAO {
     }
 
     public List<ManutencaoVeiculo> listarEmAberto(int pagina, int itensPorPagina, Connection conn) throws SQLException {
+        return listarEmAberto(null, pagina, itensPorPagina, conn);
+    }
+
+    public List<ManutencaoVeiculo> listarEmAberto(String filtro, int pagina, int itensPorPagina, Connection conn)
+            throws SQLException {
         List<ManutencaoVeiculo> manutencoes = new ArrayList<>();
         int offset = (pagina - 1) * itensPorPagina;
-        String sql = "SELECT " + COLUNAS + " " + FROM_JOIN +
-                "WHERE m.data_fim IS NULL " +
-                "ORDER BY m.data_inicio ASC " +
-                "LIMIT ? OFFSET ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, itensPorPagina);
-            stmt.setInt(2, offset);
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ").append(COLUNAS).append(" ").append(FROM_JOIN)
+                .append("WHERE m.data_fim IS NULL ");
+
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            sql.append(
+                    "AND (UPPER(v.placa) LIKE UPPER(?) OR UPPER(m.descricao) LIKE UPPER(?) OR UPPER(m.tipo) LIKE UPPER(?)) ");
+        }
+
+        sql.append("ORDER BY m.data_inicio ASC LIMIT ? OFFSET ?");
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            int idx = 1;
+            if (filtro != null && !filtro.trim().isEmpty()) {
+                String like = "%" + filtro.trim() + "%";
+                stmt.setString(idx++, like);
+                stmt.setString(idx++, like);
+                stmt.setString(idx++, like);
+            }
+            stmt.setInt(idx++, itensPorPagina);
+            stmt.setInt(idx, offset);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next())
                     manutencoes.add(mapear(rs));
@@ -142,17 +178,107 @@ public class ManutencaoVeiculoDAO {
     }
 
     public int contarEmAberto(Connection conn) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM manutencao_veiculo WHERE data_fim IS NULL";
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()) {
-            return rs.next() ? rs.getInt(1) : 0;
+        return contarEmAberto(null, conn);
+    }
+
+    public int contarEmAberto(String filtro, Connection conn) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) ").append(FROM_JOIN)
+                .append("WHERE m.data_fim IS NULL ");
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            sql.append(
+                    "AND (UPPER(v.placa) LIKE UPPER(?) OR UPPER(m.descricao) LIKE UPPER(?) OR UPPER(m.tipo) LIKE UPPER(?)) ");
+        }
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            if (filtro != null && !filtro.trim().isEmpty()) {
+                String like = "%" + filtro.trim() + "%";
+                stmt.setString(1, like);
+                stmt.setString(2, like);
+                stmt.setString(3, like);
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
         }
     }
 
     public int contarPorVeiculo(Long idVeiculo, Connection conn) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM manutencao_veiculo WHERE id_veiculo = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, idVeiculo);
+        return contarPorVeiculo(idVeiculo, null, conn);
+    }
+
+    public int contarPorVeiculo(Long idVeiculo, String filtro, Connection conn) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) ").append(FROM_JOIN)
+                .append("WHERE m.id_veiculo = ? ");
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            sql.append(
+                    "AND (UPPER(v.placa) LIKE UPPER(?) OR UPPER(m.descricao) LIKE UPPER(?) OR UPPER(m.tipo) LIKE UPPER(?)) ");
+        }
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            int idx = 1;
+            stmt.setLong(idx++, idVeiculo);
+            if (filtro != null && !filtro.trim().isEmpty()) {
+                String like = "%" + filtro.trim() + "%";
+                stmt.setString(idx++, like);
+                stmt.setString(idx++, like);
+                stmt.setString(idx++, like);
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+    public List<ManutencaoVeiculo> listarTodas(String filtro, int pagina, int itensPorPagina, Connection conn)
+            throws SQLException {
+
+        List<ManutencaoVeiculo> manutencoes = new ArrayList<>();
+        int offset = (pagina - 1) * itensPorPagina;
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ").append(COLUNAS).append(" ").append(FROM_JOIN);
+
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            sql.append(
+                    "WHERE (UPPER(v.placa) LIKE UPPER(?) OR UPPER(m.descricao) LIKE UPPER(?) OR UPPER(m.tipo) LIKE UPPER(?)) ");
+        }
+
+        sql.append("ORDER BY m.data_inicio DESC, m.id DESC LIMIT ? OFFSET ?");
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            int idx = 1;
+            if (filtro != null && !filtro.trim().isEmpty()) {
+                String like = "%" + filtro.trim() + "%";
+                stmt.setString(idx++, like);
+                stmt.setString(idx++, like);
+                stmt.setString(idx++, like);
+            }
+            stmt.setInt(idx++, itensPorPagina);
+            stmt.setInt(idx, offset);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next())
+                    manutencoes.add(mapear(rs));
+            }
+        }
+        return manutencoes;
+    }
+
+    public int contarTodas(String filtro, Connection conn) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) ").append(FROM_JOIN);
+
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            sql.append(
+                    "WHERE (UPPER(v.placa) LIKE UPPER(?) OR UPPER(m.descricao) LIKE UPPER(?) OR UPPER(m.tipo) LIKE UPPER(?)) ");
+        }
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            if (filtro != null && !filtro.trim().isEmpty()) {
+                String like = "%" + filtro.trim() + "%";
+                stmt.setString(1, like);
+                stmt.setString(2, like);
+                stmt.setString(3, like);
+            }
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next() ? rs.getInt(1) : 0;
             }
@@ -171,8 +297,9 @@ public class ManutencaoVeiculoDAO {
         manutencao.setCusto(rs.getBigDecimal("custo"));
 
         Veiculo veiculo = new Veiculo();
-        veiculo.setId(rs.getLong("id_veiculo"));
+        veiculo.setId(rs.getLong("veiculo_id"));
         veiculo.setPlaca(rs.getString("placa"));
+        veiculo.setTipoVeiculo(TipoVeiculo.fromString(rs.getString("tipo_veiculo")));
         manutencao.setVeiculo(veiculo);
 
         return manutencao;

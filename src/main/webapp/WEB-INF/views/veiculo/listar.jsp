@@ -91,7 +91,7 @@
                                                     </c:when>
                                                     <c:when test="${veiculo.status.name() == 'EM_VIAGEM'}">
                                                         <span
-                                                            class="badge badge-em-transito">${veiculo.status.descricao}</span>
+                                                            class="badge badge-saida-confirmada">${veiculo.status.descricao}</span>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <span
@@ -103,19 +103,15 @@
                                                 <div class="acoes">
                                                     <a href="${pageContext.request.contextPath}/veiculos/editar?id=${veiculo.id}"
                                                         class="btn btn-secondary btn-sm">Editar</a>
-                                                    <c:if test="${veiculo.status.name() == 'EM_MANUTENCAO'}">
-                                                        <form method="post"
-                                                            action="${pageContext.request.contextPath}/veiculos/disponivel"
-                                                            style="display:inline"
-                                                            onsubmit="return confirm('Deseja marcar este veículo como disponível?')">
-                                                            <input type="hidden" name="id" value="${veiculo.id}" />
-                                                            <button type="submit"
-                                                                class="btn btn-secondary btn-sm">Disponível</button>
-                                                        </form>
-                                                    </c:if>
                                                     <c:if test="${veiculo.status.name() == 'DISPONIVEL'}">
                                                         <a href="${pageContext.request.contextPath}/manutencoes/novo?idVeiculo=${veiculo.id}"
                                                             class="btn btn-warning btn-sm">Manutenção</a>
+                                                    </c:if>
+
+
+                                                    <c:if test="${veiculo.status.name() == 'EM_MANUTENCAO'}">
+                                                        <a href="${pageContext.request.contextPath}/manutencoes/listar?idVeiculo=${veiculo.id}"
+                                                            class="btn btn-primary btn-sm">Ver Manutenção</a>
                                                     </c:if>
                                                     <form method="post"
                                                         action="${pageContext.request.contextPath}/veiculos/excluir"

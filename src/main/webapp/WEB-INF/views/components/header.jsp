@@ -35,7 +35,7 @@
         <a href="${pageContext.request.contextPath}/veiculos/listar">Veículos</a>
         <a href="${pageContext.request.contextPath}/fretes/listar">Fretes</a>
         <a href="${pageContext.request.contextPath}/manutencoes/listar">Manutenções</a>
-        <a href="${pageContext.request.contextPath}/precosRota/listar">Preços de Rota</a>
+        <!-- <a href="${pageContext.request.contextPath}/precosRota/listar">Preços de Rota</a> -->
         <a href="${pageContext.request.contextPath}/auth/logout">Sair</a>
     </nav>
 </header>

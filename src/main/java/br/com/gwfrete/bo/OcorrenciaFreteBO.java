@@ -15,6 +15,7 @@ import br.com.gwfrete.util.UfUtil;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -181,6 +182,9 @@ public class OcorrenciaFreteBO {
             throw new OcorrenciaException(
                     "A data/hora da ocorrência não pode ser anterior à saída do frete.");
         }
+        if(ocorrencia.getDataHoraOcorrencia().isAfter(LocalDateTime.now())){
+            throw new OcorrenciaException("Não é possivel registrar ocorrência futura.");
+        }
     }
 
     private void validarCronologia(OcorrenciaFrete ocorrencia, Long idFrete, Connection conn)
@@ -190,7 +194,7 @@ public class OcorrenciaFreteBO {
                 && !ocorrencia.getDataHoraOcorrencia().isAfter(ultima.getDataHoraOcorrencia())) {
             throw new OcorrenciaException(
                     "A data/hora da ocorrência deve ser posterior à última ocorrência registrada ("
-                            + ultima.getDataHoraOcorrencia() + ").");
+                            + ultima.getDataHoraFormatada() + ").");
         }
     }
 

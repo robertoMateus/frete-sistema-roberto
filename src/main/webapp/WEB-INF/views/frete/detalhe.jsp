@@ -41,11 +41,10 @@
                     </c:choose>
                 </div>
 
-                <%-- mensagens --%>
+                <%-- Mensagens --%>
                     <c:if test="${not empty erro}">
                         <div class="erro">${erro}</div>
                     </c:if>
-
                     <c:if test="${not empty param.sucesso}">
                         <div class="mensagem-sucesso">
                             <c:choose>
@@ -57,6 +56,7 @@
                                 <c:when test="${param.sucesso == 'cancelado'}">Frete cancelado com sucesso.</c:when>
                                 <c:when test="${param.sucesso == 'ocorrencia'}">Ocorrência registrada com sucesso.
                                 </c:when>
+                                <c:when test="${param.sucesso == 'atualizado'}">Frete atualizado com sucesso.</c:when>
                             </c:choose>
                         </div>
                     </c:if>
@@ -67,7 +67,6 @@
                             <div class="card">
                                 <div class="card-titulo">Ações</div>
                                 <div class="acoes">
-
                                     <c:if test="${frete.status.name() == 'EMITIDO'}">
                                         <a href="${pageContext.request.contextPath}/fretes/confirmarSaida?id=${frete.id}"
                                             class="btn btn-primary">Confirmar Saída</a>
@@ -78,7 +77,6 @@
                                             <button type="submit" class="btn btn-danger">Cancelar Frete</button>
                                         </form>
                                     </c:if>
-
                                     <c:if test="${frete.status.name() == 'SAIDA_CONFIRMADA'}">
                                         <form method="post"
                                             action="${pageContext.request.contextPath}/fretes/emTransito"
@@ -88,205 +86,374 @@
                                             <button type="submit" class="btn btn-primary">Registrar Em Trânsito</button>
                                         </form>
                                     </c:if>
-
                                     <c:if test="${frete.status.name() == 'EM_TRANSITO'}">
                                         <button type="button" class="btn btn-primary"
                                             onclick="abrirModalEntrega()">Registrar Entrega</button>
                                         <a href="${pageContext.request.contextPath}/fretes/naoEntregue?id=${frete.id}"
                                             class="btn btn-warning">Registrar Não Entrega</a>
                                     </c:if>
-
                                     <a href="${pageContext.request.contextPath}/ocorrencias/novo?idFrete=${frete.id}"
                                         class="btn btn-secondary">+ Registrar Ocorrência</a>
-
                                 </div>
                             </div>
                         </c:if>
 
-                        <%-- Partes --%>
-                            <div class="card">
-                                <div class="card-titulo">Partes Envolvidas</div>
-                                <div class="form-row col-2">
-                                    <div class="form-group">
-                                        <label>Remetente</label>
-                                        <input type="text" readonly value="${frete.remetente.razaoSocial}" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Destinatário</label>
-                                        <input type="text" readonly value="${frete.destinatario.razaoSocial}" />
-                                    </div>
-                                </div>
-                                <div class="form-row col-2">
-                                    <div class="form-group">
-                                        <label>Motorista</label>
-                                        <input type="text" readonly value="${frete.motorista.nome}" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Veículo</label>
-                                        <input type="text" readonly value="${frete.veiculo.placa}" />
-                                    </div>
-                                </div>
-                            </div>
+                        <c:choose>
+                            <c:when test="${frete.status.name() == 'EMITIDO'}">
+                                <form method="post" action="${pageContext.request.contextPath}/fretes/editar">
+                                    <input type="hidden" name="id" value="${frete.id}" />
 
-                            <%-- Origem e destino --%>
-                                <div class="card">
-                                    <div class="card-titulo">Origem e Destino</div>
-                                    <div class="form-row col-2">
-                                        <div class="form-group">
-                                            <label>Origem</label>
-                                            <input type="text" readonly
-                                                value="${frete.municipioOrigem} / ${frete.ufOrigem}" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Destino</label>
-                                            <input type="text" readonly
-                                                value="${frete.municipioDestino} / ${frete.ufDestino}" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <%-- Carga --%>
-                                    <div class="card">
-                                        <div class="card-titulo">Carga</div>
-                                        <div class="form-row col-2">
-                                            <div class="form-group">
-                                                <label>Descrição da Carga</label>
-                                                <input type="text" readonly value="${frete.descricaoCarga}" />
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Volumes</label>
-                                                <input type="text" readonly value="${frete.volumeCarga}" />
-                                            </div>
-                                        </div>
-                                        <div class="form-row col-2">
-                                            <div class="form-group">
-                                                <label>Peso Bruto (kg)</label>
-                                                <input type="text" readonly value="${frete.pesoCarga}" />
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Data Prevista de Entrega</label>
-                                                <input type="text" readonly
-                                                    value="${frete.dataPrevisaoEntregaFormatada}" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <%-- Valores --%>
+                                    <%-- Partes Envolvidas — editável --%>
                                         <div class="card">
-                                            <div class="card-titulo">Valores</div>
-                                            <div class="form-row col-3">
+                                            <div class="card-titulo">Partes Envolvidas</div>
+                                            <div class="form-row col-2">
                                                 <div class="form-group">
-                                                    <label>Valor do Frete</label>
-                                                    <input type="text" readonly value="R$ ${frete.valorFrete}" />
+                                                    <label>Remetente <span class="obrigatorio">*</span></label>
+                                                    <select name="idRemetente" required>
+                                                        <option value="">Selecione</option>
+                                                        <c:forEach var="c" items="${clientes}">
+                                                            <option value="${c.id}" ${c.id==frete.remetente.id
+                                                                ? 'selected' : '' }>${c.razaoSocial}</option>
+                                                        </c:forEach>
+                                                    </select>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label>Alíquota ICMS (%)</label>
-                                                    <input type="text" readonly value="${frete.aliquotaIcms}" />
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Valor ICMS</label>
-                                                    <input type="text" readonly value="R$ ${frete.valorIcms}" />
+                                                    <label>Destinatário <span class="obrigatorio">*</span></label>
+                                                    <select name="idDestinatario" required>
+                                                        <option value="">Selecione</option>
+                                                        <c:forEach var="c" items="${clientes}">
+                                                            <option value="${c.id}" ${c.id==frete.destinatario.id
+                                                                ? 'selected' : '' }>${c.razaoSocial}</option>
+                                                        </c:forEach>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="form-row col-2">
                                                 <div class="form-group">
-                                                    <label>Valor Total</label>
-                                                    <input type="text" readonly value="R$ ${frete.valorTotal}" />
+                                                    <label>Motorista <span class="obrigatorio">*</span></label>
+                                                    <select name="idMotorista" required>
+                                                        <option value="">Selecione</option>
+                                                        <c:forEach var="m" items="${motoristas}">
+                                                            <option value="${m.id}" ${m.id==frete.motorista.id
+                                                                ? 'selected' : '' }>${m.nome}</option>
+                                                        </c:forEach>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Veículo <span class="obrigatorio">*</span></label>
+                                                    <select name="idVeiculo" required>
+                                                        <option value="">Selecione</option>
+                                                        <c:forEach var="v" items="${veiculos}">
+                                                            <option value="${v.id}" ${v.id==frete.veiculo.id
+                                                                ? 'selected' : '' }>${v.placa}</option>
+                                                        </c:forEach>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <%-- Datas do ciclo--%>
+                                        <%-- Origem e Destino — editável --%>
                                             <div class="card">
-                                                <div class="card-titulo">Histórico de Datas</div>
+                                                <div class="card-titulo">Origem e Destino</div>
                                                 <div class="form-row col-2">
                                                     <div class="form-group">
-                                                        <label>Data de Emissão</label>
-                                                        <input type="text" readonly
-                                                            value="${frete.dataEmissaoFormatada}" />
+                                                        <label>Município de Origem <span
+                                                                class="obrigatorio">*</span></label>
+                                                        <input type="text" name="municipioOrigem" maxlength="100"
+                                                            required value="${frete.municipioOrigem}" />
                                                     </div>
                                                     <div class="form-group">
-                                                        <label>Data de Saída</label>
-                                                        <input type="text" readonly
-                                                            value="${not empty frete.dataSaidaFormatada ? frete.dataSaidaFormatada : '—'}" />
+                                                        <label>UF Origem <span class="obrigatorio">*</span></label>
+                                                        <select name="ufOrigem" required>
+                                                            <option value="">UF</option>
+                                                            <c:forEach var="uf"
+                                                                items="${['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']}">
+                                                                <option value="${uf}" ${uf==frete.ufOrigem ? 'selected'
+                                                                    : '' }>${uf}</option>
+                                                            </c:forEach>
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 <div class="form-row col-2">
                                                     <div class="form-group">
-                                                        <label>Data de Entrega</label>
-                                                        <input type="text" readonly
-                                                            value="${not empty frete.dataEntregaFormatada ? frete.dataEntregaFormatada : '—'}" />
+                                                        <label>Município de Destino <span
+                                                                class="obrigatorio">*</span></label>
+                                                        <input type="text" name="municipioDestino" maxlength="100"
+                                                            required value="${frete.municipioDestino}" />
                                                     </div>
                                                     <div class="form-group">
-                                                        <label>Previsão de Entrega</label>
+                                                        <label>UF Destino <span class="obrigatorio">*</span></label>
+                                                        <select name="ufDestino" required>
+                                                            <option value="">UF</option>
+                                                            <c:forEach var="uf"
+                                                                items="${['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']}">
+                                                                <option value="${uf}" ${uf==frete.ufDestino ? 'selected'
+                                                                    : '' }>${uf}</option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <%-- Carga — editável --%>
+                                                <div class="card">
+                                                    <div class="card-titulo">Carga</div>
+                                                    <div class="form-row col-2">
+                                                        <div class="form-group">
+                                                            <label>Descrição da Carga <span
+                                                                    class="obrigatorio">*</span></label>
+                                                            <input type="text" name="descricaoCarga" maxlength="200"
+                                                                required value="${frete.descricaoCarga}" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Volumes <span class="obrigatorio">*</span></label>
+                                                            <input type="number" name="volumeCarga" min="1" required
+                                                                value="${frete.volumeCarga}" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row col-2">
+                                                        <div class="form-group">
+                                                            <label>Peso Bruto (kg) <span
+                                                                    class="obrigatorio">*</span></label>
+                                                            <input type="number" name="pesoCarga" step="0.01" min="0.01"
+                                                                required value="${frete.pesoCarga}" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Data Prevista de Entrega <span
+                                                                    class="obrigatorio">*</span></label>
+                                                            <input type="datetime-local" name="dataPrevisaoEntrega"
+                                                                required value="${frete.dataPrevisaoEntregaISO}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <%-- Valores — editável --%>
+                                                    <div class="card">
+                                                        <div class="card-titulo">Valores</div>
+                                                        <div class="form-row col-3">
+                                                            <div class="form-group">
+                                                                <label>Valor do Frete <span
+                                                                        class="obrigatorio">*</span></label>
+                                                                <input type="number" name="valorFrete" step="0.01"
+                                                                    min="0.01" required value="${frete.valorFrete}" />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Alíquota ICMS (%)</label>
+                                                                <input type="number" name="aliquotaIcms" step="0.01"
+                                                                    min="0" value="${frete.aliquotaIcms}" />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Valor ICMS</label>
+                                                                <input type="text" readonly
+                                                                    value="R$ ${frete.valorIcms}" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-row col-2">
+                                                            <div class="form-group">
+                                                                <label>Valor Total</label>
+                                                                <input type="text" readonly
+                                                                    value="R$ ${frete.valorTotal}" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="card">
+                                                        <div class="form-acoes">
+                                                            <button type="submit" class="btn btn-primary">Salvar
+                                                                Alterações</button>
+                                                        </div>
+                                                    </div>
+
+                                </form>
+                            </c:when>
+
+                            <c:otherwise>
+                                <%-- Partes Envolvidas — somente leitura --%>
+                                    <div class="card">
+                                        <div class="card-titulo">Partes Envolvidas</div>
+                                        <div class="form-row col-2">
+                                            <div class="form-group">
+                                                <label>Remetente</label>
+                                                <input type="text" readonly value="${frete.remetente.razaoSocial}" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Destinatário</label>
+                                                <input type="text" readonly value="${frete.destinatario.razaoSocial}" />
+                                            </div>
+                                        </div>
+                                        <div class="form-row col-2">
+                                            <div class="form-group">
+                                                <label>Motorista</label>
+                                                <input type="text" readonly value="${frete.motorista.nome}" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Veículo</label>
+                                                <input type="text" readonly value="${frete.veiculo.placa}" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <%-- Origem e Destino — somente leitura --%>
+                                        <div class="card">
+                                            <div class="card-titulo">Origem e Destino</div>
+                                            <div class="form-row col-2">
+                                                <div class="form-group">
+                                                    <label>Origem</label>
+                                                    <input type="text" readonly
+                                                        value="${frete.municipioOrigem} / ${frete.ufOrigem}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Destino</label>
+                                                    <input type="text" readonly
+                                                        value="${frete.municipioDestino} / ${frete.ufDestino}" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <%-- Carga — somente leitura --%>
+                                            <div class="card">
+                                                <div class="card-titulo">Carga</div>
+                                                <div class="form-row col-2">
+                                                    <div class="form-group">
+                                                        <label>Descrição da Carga</label>
+                                                        <input type="text" readonly value="${frete.descricaoCarga}" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Volumes</label>
+                                                        <input type="text" readonly value="${frete.volumeCarga}" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-row col-2">
+                                                    <div class="form-group">
+                                                        <label>Peso Bruto (kg)</label>
+                                                        <input type="text" readonly value="${frete.pesoCarga}" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Data Prevista de Entrega</label>
                                                         <input type="text" readonly
                                                             value="${frete.dataPrevisaoEntregaFormatada}" />
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <%-- OCORRÊNCIAS --%>
+                                            <%-- Valores — somente leitura --%>
                                                 <div class="card">
-                                                    <div class="card-titulo">Ocorrências</div>
-                                                    <c:choose>
-                                                        <c:when test="${empty ocorrencias}">
-                                                            <div class="sem-dados">Nenhuma ocorrência registrada.</div>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <div class="secao"
-                                                                style="box-shadow:none; margin-bottom:0;">
-                                                                <table>
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>Data/Hora</th>
-                                                                            <th>Tipo</th>
-                                                                            <th>Local</th>
-                                                                            <th>Descrição</th>
-                                                                            <th>Recebedor</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        <c:forEach var="oc" items="${ocorrencias}">
-                                                                            <tr>
-                                                                                <td>${oc.dataHoraFormatada}</td>
-                                                                                <td>${oc.tipo.descricao}</td>
-                                                                                <td>
-                                                                                    <c:choose>
-                                                                                        <c:when
-                                                                                            test="${not empty oc.municipio}">
-                                                                                            ${oc.municipio} / ${oc.uf}
-                                                                                        </c:when>
-                                                                                        <c:otherwise>—</c:otherwise>
-                                                                                    </c:choose>
-                                                                                </td>
-                                                                                <td>
-                                                                                    <c:choose>
-                                                                                        <c:when
-                                                                                            test="${not empty oc.descricao}">
-                                                                                            ${oc.descricao}</c:when>
-                                                                                        <c:otherwise>—</c:otherwise>
-                                                                                    </c:choose>
-                                                                                </td>
-                                                                                <td>
-                                                                                    <c:choose>
-                                                                                        <c:when
-                                                                                            test="${not empty oc.nomeRecebedor}">
-                                                                                            ${oc.nomeRecebedor}</c:when>
-                                                                                        <c:otherwise>—</c:otherwise>
-                                                                                    </c:choose>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </c:forEach>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                        </c:otherwise>
-                                                    </c:choose>
+                                                    <div class="card-titulo">Valores</div>
+                                                    <div class="form-row col-3">
+                                                        <div class="form-group">
+                                                            <label>Valor do Frete</label>
+                                                            <input type="text" readonly
+                                                                value="R$ ${frete.valorFrete}" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Alíquota ICMS (%)</label>
+                                                            <input type="text" readonly value="${frete.aliquotaIcms}" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Valor ICMS</label>
+                                                            <input type="text" readonly value="R$ ${frete.valorIcms}" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row col-2">
+                                                        <div class="form-group">
+                                                            <label>Valor Total</label>
+                                                            <input type="text" readonly
+                                                                value="R$ ${frete.valorTotal}" />
+                                                        </div>
+                                                    </div>
                                                 </div>
+                            </c:otherwise>
+                        </c:choose>
+
+                        <%-- Histórico de Datas — sempre somente leitura --%>
+                            <div class="card">
+                                <div class="card-titulo">Histórico de Datas</div>
+                                <div class="form-row col-2">
+                                    <div class="form-group">
+                                        <label>Data de Emissão</label>
+                                        <input type="text" readonly value="${frete.dataEmissaoFormatada}" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Data de Saída</label>
+                                        <input type="text" readonly
+                                            value="${not empty frete.dataSaidaFormatada ? frete.dataSaidaFormatada : '—'}" />
+                                    </div>
+                                </div>
+                                <div class="form-row col-2">
+                                    <div class="form-group">
+                                        <label>Data de Entrega</label>
+                                        <input type="text" readonly
+                                            value="${not empty frete.dataEntregaFormatada ? frete.dataEntregaFormatada : '—'}" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Previsão de Entrega</label>
+                                        <input type="text" readonly value="${frete.dataPrevisaoEntregaFormatada}" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <%-- Ocorrências — sempre somente leitura --%>
+                                <div class="card">
+                                    <div class="card-titulo">Ocorrências</div>
+                                    <c:choose>
+                                        <c:when test="${empty ocorrencias}">
+                                            <div class="sem-dados">Nenhuma ocorrência registrada.</div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="secao" style="box-shadow:none; margin-bottom:0;">
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Data/Hora</th>
+                                                            <th>Tipo</th>
+                                                            <th>Local</th>
+                                                            <th>Descrição</th>
+                                                            <th>Recebedor / Documento</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <c:forEach var="oc" items="${ocorrencias}">
+                                                            <tr>
+                                                                <td>${oc.dataHoraFormatada}</td>
+                                                                <td>${oc.tipo.descricao}</td>
+                                                                <td>
+                                                                    <c:choose>
+                                                                        <c:when test="${not empty oc.municipio}">
+                                                                            ${oc.municipio} / ${oc.uf}</c:when>
+                                                                        <c:otherwise>—</c:otherwise>
+                                                                    </c:choose>
+                                                                </td>
+                                                                <td>
+                                                                    <c:choose>
+                                                                        <c:when test="${not empty oc.descricao}">
+                                                                            ${oc.descricao}</c:when>
+                                                                        <c:otherwise>—</c:otherwise>
+                                                                    </c:choose>
+                                                                </td>
+                                                                <td>
+                                                                    <c:choose>
+                                                                        <c:when test="${not empty oc.nomeRecebedor}">
+                                                                            ${oc.nomeRecebedor}
+                                                                            <c:if test="${not empty oc.documentoRecebedor}">
+                                                                                <br />
+                                                                                <small>${oc.documentoRecebedor}</small>
+                                                                            </c:if>
+                                                                        </c:when>
+                                                                        <c:otherwise>—</c:otherwise>
+                                                                    </c:choose>
+                                                                </td>
+                                                            </tr>
+                                                        </c:forEach>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
 
             </div>
 
-            <%-- Registrar entrega --%>
+            <%-- Modal Registrar Entrega --%>
                 <div id="modalEntrega" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
          background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center;">
                     <div
@@ -298,6 +465,14 @@
                                 <label>Data/Hora da Entrega <span class="obrigatorio">*</span></label>
                                 <input type="datetime-local" name="dataEntrega" required />
                             </div>
+                            <div class="form-group" style="margin-bottom:20px;">
+                                <label>Nome do Recebedor <span class="obrigatorio">*</span></label>
+                                <input type="text" name="nomeRecebedor" maxlength="150" required />
+                            </div>
+                            <div class="form-group" style="margin-bottom:20px;">
+                                <label>Documento do Recebedor <span class="obrigatorio">*</span></label>
+                                <input type="text" name="documentoRecebedor" maxlength="20" required />
+                            </div>
                             <div class="form-acoes">
                                 <button type="button" class="btn btn-secondary"
                                     onclick="fecharModalEntrega()">Cancelar</button>
@@ -307,7 +482,7 @@
                     </div>
                 </div>
 
-                <%-- Registrar Ocorrencia--%>
+                <%-- Modal Registrar Ocorrência --%>
                     <div id="modalOcorrencia" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
          background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center;">
                         <div
